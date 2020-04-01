@@ -39,4 +39,7 @@ D:\programeren\semester 2\individual\WPF_ServiceBus\WPF_ServiceBus\bin\Debug\Sys
 D:\programeren\semester 2\individual\WPF_ServiceBus\WPF_ServiceBus\bin\Debug\System.Memory.xml
 D:\programeren\semester 2\individual\WPF_ServiceBus\WPF_ServiceBus\bin\Debug\System.Numerics.Vectors.xml
 D:\programeren\semester 2\individual\WPF_ServiceBus\WPF_ServiceBus\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
-D:\programeren\semester 2\individual\WPF_ServiceBus\WPF_ServiceBus\obj\Debug\GeneratedInternalTypeHelper.g.cs
+D:\programeren\semester 2\individual\WPF_ServiceBus\WPF_ServiceBus\bin\Debug\Microsoft.Rest.ClientRuntime.dll
+D:\programeren\semester 2\individual\WPF_ServiceBus\WPF_ServiceBus\bin\Debug\Microsoft.ServiceBus.dll
+D:\programeren\semester 2\individual\WPF_ServiceBus\WPF_ServiceBus\bin\Debug\Microsoft.Rest.ClientRuntime.xml
+D:\programeren\semester 2\individual\WPF_ServiceBus\WPF_ServiceBus\bin\Debug\Microsoft.ServiceBus.xml

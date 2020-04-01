@@ -62,7 +62,8 @@ namespace WPF_ServiceBus.ServiceBus
                 }
             }
 
-            _handler = new ServiceBusTopicHandler(_SessionData.connectionString, _SessionData.topic, _SessionData.subscription, ProcessMessagesAsync);
+            //_handler = new ServiceBusTopicHandler(_SessionData.connectionString, _SessionData.topic, _SessionData.subscription, ProcessMessagesAsync);
+            _handler = new ServiceBusQueueHandler(_SessionData.connectionString, _SessionData.queueName, ProcessMessagesAsync);
         }
 
         public async void SendMessage(ConnectionModel connectionModel)
