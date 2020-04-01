@@ -14,13 +14,12 @@ namespace WPF_ServiceBus.ServiceBus
     {
         static IQueueClient _queueClient;
 
-        public ServiceBusQueueHandler(string connectionString, string queueName)
+        public ServiceBusQueueHandler(string connectionString, string queueName, Func<Message, CancellationToken, Task> onMessageRecivedCallBack)
         {
             _queueClient = new QueueClient(connectionString, queueName);
 
             // Register QueueClient's MessageHandler and receive messages in a loop
-            RegisterOnMessageHandlerAndReceiveMessages();
-
+            RegisterOnMessageHandlerAndReceiveMessages(onMessageRecivedCallBack);
         }
 
         public async Task SendMessagesAsync(string message)
@@ -43,7 +42,7 @@ namespace WPF_ServiceBus.ServiceBus
             }
         }
 
-        void RegisterOnMessageHandlerAndReceiveMessages()
+        void RegisterOnMessageHandlerAndReceiveMessages(Func<Message, CancellationToken, Task> onMessageRecivedCallBack)
         {
             // Configure the message handler options in terms of exception handling, number of concurrent messages to deliver, etc.
             var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler)
@@ -58,21 +57,7 @@ namespace WPF_ServiceBus.ServiceBus
             };
 
             // Register the function that processes messages.
-            _queueClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
-        }
-
-        async Task ProcessMessagesAsync(Message message, CancellationToken token)
-        {
-            // Process the message.
-            Console.WriteLine($"Received message from queue: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{Encoding.UTF8.GetString(message.Body)}");
-
-            // Complete the message so that it is not received again.
-            // This can be done only if the queue Client is created in ReceiveMode.PeekLock mode (which is the default).
-            await _queueClient.CompleteAsync(message.SystemProperties.LockToken);
-
-            // Note: Use the cancellationToken passed as necessary to determine if the queueClient has already been closed.
-            // If queueClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.
-            // to avoid unnecessary exceptions.
+            _queueClient.RegisterMessageHandler(onMessageRecivedCallBack, messageHandlerOptions);
         }
 
         Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)
@@ -86,9 +71,11 @@ namespace WPF_ServiceBus.ServiceBus
             return Task.CompletedTask;
         }
 
-        public Task completeAsync(string lockToken)
+        public async Task completeAsync(string lockToken)
         {
-            throw new NotImplementedException();
+            // Complete the message so that it is not received again.
+            // This can be done only if the queue Client is created in ReceiveMode.PeekLock mode (which is the default).
+            await _queueClient.CompleteAsync(lockToken);
         }
     }
 }

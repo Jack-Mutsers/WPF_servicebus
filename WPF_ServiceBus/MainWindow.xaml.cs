@@ -54,10 +54,10 @@ namespace WPF_ServiceBus
         private void InitializeProgram()
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
-            //data.Add("ConnectionString", "");
+            data.Add("ConnectionString", "Endpoint=sb://proftaak-test.servicebus.windows.net/;SharedAccessKeyName=chat;SharedAccessKey=J21bM387fclbAHaENUvHDH6KrI85aAGRtc9b/cGtLhY=");
             //data.Add("Topic", "");
-            data.Add("Subscription", "S2DB04");
-            //data.Add("Queue", "");
+            //data.Add("Subscription", "S2DB04");
+            data.Add("Queue", "myfirstchat");
 
             program.SetData(data);
             program.MessageReceived += OnMessageReceived;
