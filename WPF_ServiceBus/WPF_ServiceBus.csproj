@@ -186,12 +186,20 @@
     <Compile Include="JoinWindow.xaml.cs">
       <DependentUpon>JoinWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Logics\SessionCodeGenerator.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="PlayingField.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PlayingField.xaml.cs">
+      <DependentUpon>PlayingField.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

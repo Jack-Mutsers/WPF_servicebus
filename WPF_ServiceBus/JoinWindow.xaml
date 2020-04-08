@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="JoinWindow" Height="450" Width="800">
     <Grid>
-        
+        <Button x:Name="btnBack" Content="back to home" HorizontalAlignment="Left" Margin="10,389,0,0" VerticalAlignment="Top" Width="89" Click="btnBack_Click"/>
+
     </Grid>
 </Window>

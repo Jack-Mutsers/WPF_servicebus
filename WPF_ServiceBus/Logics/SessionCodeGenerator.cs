@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ServiceBus.model
+namespace WPF_ServiceBus.Logics
 {
-    public class AbonnementModel
+    class SessionCodeGenerator
     {
-
     }
 }

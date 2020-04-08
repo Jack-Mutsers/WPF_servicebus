@@ -7,9 +7,25 @@
         mc:Ignorable="d"
         Title="HostWindow" Height="450" Width="800">
     <Grid>
-        <Button Content="generade session code" HorizontalAlignment="Left" Margin="46,89,0,0" VerticalAlignment="Top" Width="139"/>
+        <Label Content="name: " HorizontalAlignment="Left" Margin="46,50,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbName" HorizontalAlignment="Left" Height="23" Margin="91,53,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <Button Content="generade session code" HorizontalAlignment="Left" Margin="46,89,0,0" VerticalAlignment="Top" Width="139" Click="Start_Host"/>
         <Label Content="session code: " HorizontalAlignment="Left" Margin="46,160,0,0" VerticalAlignment="Top"/>
-        <Label Content="{Binding}" HorizontalAlignment="Left" Margin="134,160,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblSession" HorizontalAlignment="Left" Margin="134,160,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnBack" Content="back to home" HorizontalAlignment="Left" Margin="10,389,0,0" VerticalAlignment="Top" Width="89" Click="btnBack_Click"/>
+        <ListView Name="lv" HorizontalAlignment="Left" Height="143" Margin="458,27,0,0" VerticalAlignment="Top" Width="300">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Order Number:"/>
+                        <Label Width="15" Content="{Binding orderNumber}"/>
+                        <Label Content="Naam:"/>
+                        <Label Width="100" Content="{Binding name}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
 
     </Grid>
 </Window>

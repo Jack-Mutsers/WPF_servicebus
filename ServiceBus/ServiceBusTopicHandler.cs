@@ -26,6 +26,7 @@ namespace ServiceBus
             {
                 // Create a new message to send to the topic.
                 var encodedMessage = new Message(Encoding.UTF8.GetBytes(message));
+
                 // Send the message to the topic.
                 await topicClient.SendAsync(encodedMessage);
             }

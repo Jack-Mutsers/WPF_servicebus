@@ -7,48 +7,9 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Button x:Name="shoot" Content="shoot" HorizontalAlignment="Left" Margin="46,340,0,0" VerticalAlignment="Top" Width="75" Click="shoot_Click"/>
-        <Button x:Name="surrender" Content="surender" HorizontalAlignment="Left" Margin="205,340,0,0" VerticalAlignment="Top" Width="75" Click="surrender_Click" />
-        <Grid Name="myGrid" Width="250" Height="250" Background="Green" PreviewMouseLeftButtonDown="OnPreviewMouseLeftButtonDown" Margin="10,10,532,159">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="3*" />
-                <RowDefinition Height="3*" />
-                <RowDefinition Height="3*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" />
-                <ColumnDefinition Width="3*" />
-                <ColumnDefinition Width="3*" />
-            </Grid.ColumnDefinitions>
-            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="0" />
-            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="1" />
-            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="2" />
-            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="1" Grid.Column="0" />
-            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="1" Grid.Column="1" />
-            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="1" Grid.Column="2" />
-            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="2" Grid.Column="0" />
-            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="2" Grid.Column="1" />
-            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="2" Grid.Column="2" />
-        </Grid>
-        <Label Content="Input log" HorizontalAlignment="Left" Margin="306,12,0,0" VerticalAlignment="Top"/>
-        <ListBox x:Name="lbLog" HorizontalAlignment="Left" Height="149" Margin="306,38,0,0" VerticalAlignment="Top" Width="476"/>
-        
-        <Label Content="Respose values" HorizontalAlignment="Left" Margin="306,219,0,0" VerticalAlignment="Top"/>
-        <Grid x:Name="responseGrid" >
-            <Label Content="naam:" HorizontalAlignment="Left" Margin="306,250,0,0" VerticalAlignment="Top"/>
-            <Label Content="{Binding Path=naam, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="387,250,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnHost" Content="Host" HorizontalAlignment="Left" Margin="79,52,0,0" VerticalAlignment="Top" Width="75" Click="btnHost_Click"/>
+        <Button x:Name="btnJoin" Content="Join" HorizontalAlignment="Left" Margin="79,89,0,0" VerticalAlignment="Top" Width="75" Click="btnJoin_Click"/>
+        <Button x:Name="tbnPlay" Content="Play" HorizontalAlignment="Left" Margin="79,135,0,0" VerticalAlignment="Top" Width="75" Click="tbnPlay_Click"/>
 
-            <Label Content="sessionCode:" HorizontalAlignment="Left" Margin="306,276,0,0" VerticalAlignment="Top"/>
-            <Label Content="{Binding Path=sessionCode, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="387,276,0,0" VerticalAlignment="Top"/>
-
-            <Label Content="coördinates:" HorizontalAlignment="Left" Margin="306,306,0,0" VerticalAlignment="Top"/>
-            <Label Content="col:" HorizontalAlignment="Left" Margin="387,306,0,0" VerticalAlignment="Top"/>
-            <Label Content="{Binding Path=coordinates.col, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="415,306,-29,0" VerticalAlignment="Top"/>
-            <Label Content="row:" HorizontalAlignment="Left" Margin="446,306,0,0" VerticalAlignment="Top"/>
-            <Label Content="{Binding Path=coordinates.row, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="478,306,0,0" VerticalAlignment="Top"/>
-            
-            <Label Content="action:" HorizontalAlignment="Left" Margin="306,331,0,0" VerticalAlignment="Top"/>
-            <Label Content="{Binding Path=action, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="387,331,0,0" VerticalAlignment="Top"/>
-        </Grid>
     </Grid>
 </Window>

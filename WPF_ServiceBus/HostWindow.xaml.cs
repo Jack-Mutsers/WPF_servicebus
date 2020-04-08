@@ -1,4 +1,5 @@
-﻿using ServiceBus.model;
+﻿using Newtonsoft.Json;
+using ServiceBus.model;
 using ServiceBus.session;
 using System;
 using System.Collections.Generic;
@@ -22,18 +23,52 @@ namespace WPF_ServiceBus
     /// </summary>
     public partial class HostWindow : Window
     {
-        ServiceBusHandler initialiser = new ServiceBusHandler(true); 
+        ServiceBusHandler _handler = new ServiceBusHandler(); 
 
         public HostWindow()
         {
             InitializeComponent();
 
-            initialiser.program.MessageReceived += OnMessageReceived;
+            _handler.program.MessageReceived += OnMessageReceived;
         }
 
-        public void OnMessageReceived(ActionModel source)
+        private void Start_Host(object sender, RoutedEventArgs e)
         {
-            
+            string sessionCode = "AB12RB";
+
+            PlayerModel player = new PlayerModel();
+            player.name = tbName.Text;
+            player.type = PlayerType.Host;
+
+            _handler.self = player;
+
+            string message = JsonConvert.SerializeObject(player);
+
+            _handler.SendMessage(message, MessageType.JoinRequest, sessionCode);
+        }
+
+
+
+        public void OnMessageReceived(string message)
+        {
+            _handler.HandleMessage(message);
+
+            TransferModel transfer = JsonConvert.DeserializeObject<TransferModel>(message);
+
+            lblSession.Content = transfer.sessionCode;
+
+            if (transfer.type == MessageType.Response)
+            {
+                SessionResponseModel response = JsonConvert.DeserializeObject<SessionResponseModel>(transfer.message);
+                lv.ItemsSource = response.playerList;
+            }
+        }
+
+        private void btnBack_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow main = new MainWindow();
+            main.Show();
+            this.Close();
         }
     }
 }
