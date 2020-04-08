@@ -1,14 +1,10 @@
 ﻿using Microsoft.Azure.ServiceBus;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using WPF_ServiceBus.ServiceBus.model;
 
-namespace WPF_ServiceBus.ServiceBus
+namespace ServiceBus
 {
     public class ServiceBusTopicHandler : IServiceBusHandler
     {

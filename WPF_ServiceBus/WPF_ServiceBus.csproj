@@ -163,13 +163,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ServiceBus\IServiceBusHandler.cs" />
-    <Compile Include="ServiceBus\model\ConnectionModel.cs" />
-    <Compile Include="ServiceBus\model\Coordinates.cs" />
-    <Compile Include="ServiceBus\Program.cs" />
-    <Compile Include="ServiceBus\ServiceBusQueueHandler.cs" />
-    <Compile Include="ServiceBus\ServiceBusTopicHandler.cs" />
-    <Compile Include="ServiceBus\session\SessionData.cs" />
+    <Page Include="HostWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="JoinWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -177,6 +178,13 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="HostWindow.xaml.cs">
+      <DependentUpon>HostWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Logics\ServiceBusHandler.cs" />
+    <Compile Include="JoinWindow.xaml.cs">
+      <DependentUpon>JoinWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -210,6 +218,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ServiceBus\ServiceBus.csproj">
+      <Project>{d7b8c242-c687-49e0-91e5-43dc8418719e}</Project>
+      <Name>ServiceBus</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

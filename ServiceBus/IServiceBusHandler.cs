@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WPF_ServiceBus.ServiceBus
+namespace ServiceBus
 {
     public interface IServiceBusHandler
     {

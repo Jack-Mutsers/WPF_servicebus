@@ -1,24 +1,7 @@
-﻿using Microsoft.Azure.ServiceBus;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using ServiceBus.model;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using WPF_ServiceBus.ServiceBus;
-using WPF_ServiceBus.ServiceBus.model;
-using WPF_ServiceBus.ServiceBus.session;
+using WPF_ServiceBus.Logics;
 
 namespace WPF_ServiceBus
 {
@@ -27,11 +10,8 @@ namespace WPF_ServiceBus
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ConnectionModel connectionModel = new ConnectionModel();
-
-        // start add
-        Program program = new Program();
-        // end add
+        ServiceBusHandler initialiser = new ServiceBusHandler(true);
+        CoordinatesModel coordinates { get; set; }
 
         void addLogItem(string text)
         {
@@ -44,35 +24,20 @@ namespace WPF_ServiceBus
         public MainWindow()
         {
             InitializeComponent();
-            
-            // start add
-            InitializeProgram();
-            // end add
-        }
 
-        // start add
-        private void InitializeProgram()
-        {
-            Dictionary<string, string> data = new Dictionary<string, string>();
-            data.Add("ConnectionString", "Endpoint=sb://proftaak-test.servicebus.windows.net/;SharedAccessKeyName=chat;SharedAccessKey=J21bM387fclbAHaENUvHDH6KrI85aAGRtc9b/cGtLhY=");
-            //data.Add("Topic", "");
-            //data.Add("Subscription", "S2DB04");
-            data.Add("Queue", "myfirstchat");
-
-            program.SetData(data);
-            program.MessageReceived += OnMessageReceived;
+            initialiser.program.MessageReceived += OnMessageReceived;
         }
-        // end add
 
         private void shoot_Click(object sender, RoutedEventArgs e)
         {
-            if (connectionModel.coordinates != null)
+            ActionModel actionModel = new ActionModel();
+            if (coordinates != null)
             {
-                connectionModel.action = ConnectionModel.Action.shoot;
-                connectionModel.naam = "Jack";
-                connectionModel.sessionCode = "ab6ER8";
+                actionModel.action = ActionModel.Action.shoot;
+                actionModel.coordinates = coordinates;
+                actionModel.sessionCode = "ab6ER8";
 
-                program.SendMessage(connectionModel);
+                initialiser.SendMessage(actionModel);
 
                 addLogItem("shooting data send");
             }
@@ -80,23 +45,22 @@ namespace WPF_ServiceBus
             {
                 addLogItem("coordinates are required");
             }
-
-            connectionModel.coordinates = null;
         }
 
         private void surrender_Click(object sender, RoutedEventArgs e)
         {
-            connectionModel.action = ConnectionModel.Action.surender;
-            connectionModel.naam = "Jack";
-            connectionModel.sessionCode = "ab6ER8";
+            ActionModel actionModel = new ActionModel();
 
-            program.SendMessage(connectionModel);
+            actionModel.action = ActionModel.Action.surender;
+            actionModel.sessionCode = "ab6ER8";
+
+            initialiser.SendMessage(actionModel);
             addLogItem("you chose to surender");
         }
 
         private void OnPreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            Coordinates coordinates = new Coordinates();
+            coordinates = new CoordinatesModel();
             var point = Mouse.GetPosition(myGrid);
 
             double accumulatedHeight = 0.0;
@@ -122,20 +86,14 @@ namespace WPF_ServiceBus
 
 
             addLogItem("coordiantes chosen Row: " + coordinates.row + " Col: " + coordinates.col);
-            connectionModel.coordinates = coordinates;
 
             // row and col now correspond Grid's RowDefinition and ColumnDefinition mouse was 
             // over when double clicked!
         }
 
-
-
-        // start add
-        public void OnMessageReceived(ConnectionModel source)
+        public void OnMessageReceived(ActionModel source)
         {
             responseGrid.DataContext = source;
         }
-        // end add
-
     }
 }

@@ -1,14 +1,10 @@
 ﻿using Microsoft.Azure.ServiceBus;
-using Microsoft.Azure.ServiceBus.Management;
-using Microsoft.ServiceBus;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WPF_ServiceBus.ServiceBus
+namespace ServiceBus
 {
     public class ServiceBusQueueHandler : IServiceBusHandler
     {

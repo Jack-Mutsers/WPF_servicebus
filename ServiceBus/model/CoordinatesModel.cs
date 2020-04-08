@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WPF_ServiceBus.ServiceBus.model
+namespace ServiceBus.model
 {
-    public class Coordinates
+    public class CoordinatesModel
     {
         public int row { get; set; }
         public int col { get; set; }

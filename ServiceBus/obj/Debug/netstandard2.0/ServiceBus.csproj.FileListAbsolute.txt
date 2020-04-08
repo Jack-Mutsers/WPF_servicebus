@@ -1,0 +1,9 @@
+D:\programeren\semester 2\individual\WPF_ServiceBus\ServiceBus\obj\Debug\netstandard2.0\ServiceBus.csproj.CoreCompileInputs.cache
+D:\programeren\semester 2\individual\WPF_ServiceBus\ServiceBus\obj\Debug\netstandard2.0\ServiceBus.AssemblyInfoInputs.cache
+D:\programeren\semester 2\individual\WPF_ServiceBus\ServiceBus\obj\Debug\netstandard2.0\ServiceBus.AssemblyInfo.cs
+D:\programeren\semester 2\individual\WPF_ServiceBus\ServiceBus\bin\Debug\netstandard2.0\ServiceBus.deps.json
+D:\programeren\semester 2\individual\WPF_ServiceBus\ServiceBus\bin\Debug\netstandard2.0\ServiceBus.dll
+D:\programeren\semester 2\individual\WPF_ServiceBus\ServiceBus\bin\Debug\netstandard2.0\ServiceBus.pdb
+D:\programeren\semester 2\individual\WPF_ServiceBus\ServiceBus\obj\Debug\netstandard2.0\ServiceBus.dll
+D:\programeren\semester 2\individual\WPF_ServiceBus\ServiceBus\obj\Debug\netstandard2.0\ServiceBus.pdb
+D:\programeren\semester 2\individual\WPF_ServiceBus\ServiceBus\obj\Debug\netstandard2.0\ServiceBus.csprojAssemblyReference.cache

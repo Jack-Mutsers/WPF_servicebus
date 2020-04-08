@@ -4,24 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WPF_ServiceBus.ServiceBus.model
+namespace ServiceBus.model
 {
-    public class ConnectionModel
+    public class ActionModel
     {
-        public string naam { get; set; }
+        public Guid playerId { get; set; }
         public string sessionCode { get; set; }
-        public Coordinates coordinates { get; set; }
+        public CoordinatesModel coordinates { get; set; }
         public Action action { get; set; }
 
         public enum Action
         {
-            setBoat,
-            joinSession,
             shoot,
             surender
         }
-
-
     }
 
 }
