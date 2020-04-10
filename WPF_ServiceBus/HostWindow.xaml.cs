@@ -30,38 +30,39 @@ namespace WPF_ServiceBus
             InitializeComponent();
 
             _handler.program.MessageReceived += OnMessageReceived;
+            lv.ItemsSource = _handler.PlayerCollection;
         }
 
         private void Start_Host(object sender, RoutedEventArgs e)
         {
-            string sessionCode = "AB12RB";
+            // check if user data is unset
+            if (_handler.self == null)
+            {
+                // initialise SessionCodeGenerator
+                SessionCodeGenerator generator = new SessionCodeGenerator();
 
-            PlayerModel player = new PlayerModel();
-            player.name = tbName.Text;
-            player.type = PlayerType.Host;
+                // Generade sessionCode
+                string sessionCode = generator.GenerateSessionCode();
 
-            _handler.self = player;
+                // Set player data
+                PlayerModel player = new PlayerModel();
+                player.name = tbName.Text;
+                player.type = PlayerType.Host;
 
-            string message = JsonConvert.SerializeObject(player);
+                // store player data in handler
+                _handler.self = player;
 
-            _handler.SendMessage(message, MessageType.JoinRequest, sessionCode);
+                // Serialize player data
+                string message = JsonConvert.SerializeObject(player);
+
+                // sent player data in a join request
+                _handler.SendMessage(message, MessageType.JoinRequest, sessionCode);
+            }
         }
-
-
 
         public void OnMessageReceived(string message)
         {
             _handler.HandleMessage(message);
-
-            TransferModel transfer = JsonConvert.DeserializeObject<TransferModel>(message);
-
-            lblSession.Content = transfer.sessionCode;
-
-            if (transfer.type == MessageType.Response)
-            {
-                SessionResponseModel response = JsonConvert.DeserializeObject<SessionResponseModel>(transfer.message);
-                lv.ItemsSource = response.playerList;
-            }
         }
 
         private void btnBack_Click(object sender, RoutedEventArgs e)

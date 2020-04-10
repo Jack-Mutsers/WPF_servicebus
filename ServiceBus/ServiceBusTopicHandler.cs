@@ -13,6 +13,7 @@ namespace ServiceBus
 
         public ServiceBusTopicHandler(string connectionString, string topic, string subscriptionName, Func<Message, CancellationToken, Task> onMessageRecivedCallBack)
         {
+            // create connection link
             topicClient = new TopicClient(connectionString, topic);
             subscriptionClient = new SubscriptionClient(connectionString, topic, subscriptionName);
 
@@ -58,7 +59,7 @@ namespace ServiceBus
         {
             // Complete the message so that it is not received again.
             // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
-            await subscriptionClient.CompleteAsync(lockToken);
+            //await subscriptionClient.CompleteAsync(lockToken);
         }
 
         // Use this handler to examine the exceptions received on the message pump.

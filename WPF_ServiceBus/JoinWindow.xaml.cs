@@ -22,6 +22,7 @@ namespace WPF_ServiceBus
     /// </summary>
     public partial class JoinWindow : Window
     {
+        ServiceBusHandler _handler = new ServiceBusHandler();
         ServiceBusHandler initialiser = new ServiceBusHandler();
 
         public JoinWindow()
@@ -29,16 +30,13 @@ namespace WPF_ServiceBus
             InitializeComponent();
 
             initialiser.program.MessageReceived += OnMessageReceived;
+            lv.ItemsSource = _handler.PlayerCollection;
         }
 
         public void OnMessageReceived(string message)
         {
-            TransferModel transfer = JsonConvert.DeserializeObject<TransferModel>(message);
-
-            if (transfer.type == MessageType.Response)
-            {
-                ActionModel source = JsonConvert.DeserializeObject<ActionModel>(transfer.message);
-            }
+            _handler.HandleMessage(message);
+            int test = 1;
         }
 
         private void btnBack_Click(object sender, RoutedEventArgs e)
@@ -46,6 +44,24 @@ namespace WPF_ServiceBus
             MainWindow main = new MainWindow();
             main.Show();
             this.Close();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (_handler.self == null) 
+            {
+                string sessionCode = tbCode.Text;
+
+                PlayerModel player = new PlayerModel();
+                player.name = tbName.Text;
+                player.type = PlayerType.Guest;
+
+                _handler.self = player;
+
+                string message = JsonConvert.SerializeObject(player);
+
+                _handler.SendMessage(message, MessageType.JoinRequest, sessionCode);
+            }
         }
     }
 }

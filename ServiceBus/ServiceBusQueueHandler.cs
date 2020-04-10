@@ -12,6 +12,7 @@ namespace ServiceBus
 
         public ServiceBusQueueHandler(string connectionString, string queueName, Func<Message, CancellationToken, Task> onMessageRecivedCallBack)
         {
+            // create connection link
             _queueClient = new QueueClient(connectionString, queueName);
 
             // Register QueueClient's MessageHandler and receive messages in a loop
