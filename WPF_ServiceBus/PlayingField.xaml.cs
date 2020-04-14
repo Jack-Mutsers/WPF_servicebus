@@ -22,7 +22,7 @@ namespace WPF_ServiceBus
     /// </summary>
     public partial class PlayingField : Window
     {
-        ServiceBusHandler initialiser = new ServiceBusHandler();
+        ServiceBusHandler initialiser = new ServiceBusHandler("AB12R");
         CoordinatesModel coordinates { get; set; }
 
         void addLogItem(string text)

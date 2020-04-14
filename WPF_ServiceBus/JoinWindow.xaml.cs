@@ -22,14 +22,13 @@ namespace WPF_ServiceBus
     /// </summary>
     public partial class JoinWindow : Window
     {
-        ServiceBusHandler _handler = new ServiceBusHandler();
-        ServiceBusHandler initialiser = new ServiceBusHandler();
+        ServiceBusHandler _handler;
 
         public JoinWindow()
         {
             InitializeComponent();
 
-            initialiser.program.MessageReceived += OnMessageReceived;
+            _handler.program.MessageReceived += OnMessageReceived;
             lv.ItemsSource = _handler.PlayerCollection;
         }
 
@@ -48,10 +47,13 @@ namespace WPF_ServiceBus
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            string sessionCode = tbCode.Text;
+
+            if (_handler == null)
+                _handler = new ServiceBusHandler(sessionCode);
+
             if (_handler.self == null) 
             {
-                string sessionCode = tbCode.Text;
-
                 PlayerModel player = new PlayerModel();
                 player.name = tbName.Text;
                 player.type = PlayerType.Guest;

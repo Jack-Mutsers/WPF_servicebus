@@ -8,7 +8,7 @@ namespace ServiceBus.session
 {
     public class SessionData
     {
-        public string connectionString { get; set; } = "Endpoint=sb://proftaak-test.servicebus.windows.net/;SharedAccessKeyName=RootManagerSharedAccessKey;SharedAccessKey=HrPq1vOZCrhFGWycLEMhfQvYiP2Pu2GDuj2YawZ3bwU=;";
+        public string connectionString { get; set; } = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=AccessManagement;SharedAccessKey=7fPwUZb0t5nxmd15min/ubFom/yGK5ryf9or31tdjog=;";
         public string topic { get; set; } = "chat";
         public Subscriptions subscription { get; set; } = Subscriptions.ChannelOne;
         public string queueName { get; set; } = "myfirstqueue";

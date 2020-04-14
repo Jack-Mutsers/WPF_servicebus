@@ -8,7 +8,7 @@ namespace ServiceBus
 {
     public interface IServiceBusHandler
     {
-        Task SendMessagesAsync(string message);
+        Task SendMessagesAsync(string message, string sessionCode);
         Task completeAsync(string lockToken);
     }
 }

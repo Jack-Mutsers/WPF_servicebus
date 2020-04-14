@@ -62,7 +62,6 @@ namespace ServiceBus
         {
             // create trasfer model to differentiate between message types
             TransferModel transfer = new TransferModel();
-            transfer.sessionCode = sessionCode;
             transfer.message = message;
             transfer.type = type;
 
@@ -70,7 +69,7 @@ namespace ServiceBus
             string line = JsonConvert.SerializeObject(transfer);
 
             // sent the message string to the service bus
-            await _handler.SendMessagesAsync(line);
+            await _handler.SendMessagesAsync(line, _SessionData.sessionCode);
         }
 
         public async Task ProcessMessagesAsync(Message message, CancellationToken token)

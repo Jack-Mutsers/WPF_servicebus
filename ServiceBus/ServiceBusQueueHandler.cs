@@ -19,12 +19,15 @@ namespace ServiceBus
             RegisterOnMessageHandlerAndReceiveMessages(onMessageRecivedCallBack);
         }
 
-        public async Task SendMessagesAsync(string message)
+        public async Task SendMessagesAsync(string message, string sessionCode)
         {
             try
             {
                 // Create a new message to send to the queue.
                 var encodedMessage = new Message(Encoding.UTF8.GetBytes(message));
+
+                // assign session code to message
+                encodedMessage.SessionId = sessionCode;
 
                 // Write the body of the message to the console.
                 Console.WriteLine($"Sending message: {message}");

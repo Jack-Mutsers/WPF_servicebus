@@ -23,7 +23,7 @@ namespace WPF_ServiceBus
     /// </summary>
     public partial class HostWindow : Window
     {
-        ServiceBusHandler _handler = new ServiceBusHandler(); 
+        ServiceBusHandler _handler;
 
         public HostWindow()
         {
@@ -35,14 +35,22 @@ namespace WPF_ServiceBus
 
         private void Start_Host(object sender, RoutedEventArgs e)
         {
-            // check if user data is unset
-            if (_handler.self == null)
+            // check if handler is empty, if so create an instance of it
+            if (_handler == null)
             {
                 // initialise SessionCodeGenerator
                 SessionCodeGenerator generator = new SessionCodeGenerator();
 
                 // Generade sessionCode
                 string sessionCode = generator.GenerateSessionCode();
+
+                // create an instance of the servicebus handler
+                _handler = new ServiceBusHandler(sessionCode);
+            }
+
+            // check if user data is unset
+            if (_handler.self == null)
+            {
 
                 // Set player data
                 PlayerModel player = new PlayerModel();
@@ -56,7 +64,7 @@ namespace WPF_ServiceBus
                 string message = JsonConvert.SerializeObject(player);
 
                 // sent player data in a join request
-                _handler.SendMessage(message, MessageType.JoinRequest, sessionCode);
+                _handler.SendMessage(message, MessageType.JoinRequest);
             }
         }
 

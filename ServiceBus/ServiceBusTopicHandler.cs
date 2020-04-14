@@ -21,12 +21,13 @@ namespace ServiceBus
             RegisterOnMessageHandlerAndReceiveMessages(onMessageRecivedCallBack);
         }
 
-        public async Task SendMessagesAsync(string message)
+        public async Task SendMessagesAsync(string message, string sessionCode)
         {
             try
             {
                 // Create a new message to send to the topic.
                 var encodedMessage = new Message(Encoding.UTF8.GetBytes(message));
+                encodedMessage.SessionId = sessionCode;
 
                 // Send the message to the topic.
                 await topicClient.SendAsync(encodedMessage);
@@ -59,7 +60,7 @@ namespace ServiceBus
         {
             // Complete the message so that it is not received again.
             // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
-            //await subscriptionClient.CompleteAsync(lockToken);
+            await subscriptionClient.CompleteAsync(lockToken);
         }
 
         // Use this handler to examine the exceptions received on the message pump.

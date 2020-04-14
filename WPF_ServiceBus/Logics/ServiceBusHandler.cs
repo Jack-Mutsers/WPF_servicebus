@@ -38,7 +38,7 @@ namespace WPF_ServiceBus.Logics
 
         public PlayerModel self { get; set; }
 
-        public ServiceBusHandler()
+        public ServiceBusHandler(string sessionCode)
         {
             program = new Program();
 
@@ -49,11 +49,12 @@ namespace WPF_ServiceBus.Logics
             //data.connectionString = "Endpoint=sb://proftaak-test.servicebus.windows.net/;SharedAccessKeyName=chat;SharedAccessKey=J21bM387fclbAHaENUvHDH6KrI85aAGRtc9b/cGtLhY=";
             
             // topic connection string
-            data.connectionString = "Endpoint=sb://proftaak-test.servicebus.windows.net/;SharedAccessKeyName=RootManagerSharedAccessKey;SharedAccessKey=HrPq1vOZCrhFGWycLEMhfQvYiP2Pu2GDuj2YawZ3bwU=;";
+            data.connectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=AccessManagement;SharedAccessKey=7fPwUZb0t5nxmd15min/ubFom/yGK5ryf9or31tdjog=;";
 
             data.topic = "chat";
             data.subscription = Subscriptions.Join;
             data.queueName = "myfirstchat";
+            data.sessionCode = sessionCode;
 
             // pass over connection data
             program.SetData(data);
