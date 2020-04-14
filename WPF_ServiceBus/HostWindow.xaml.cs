@@ -29,8 +29,6 @@ namespace WPF_ServiceBus
         {
             InitializeComponent();
 
-            _handler.program.MessageReceived += OnMessageReceived;
-            lv.ItemsSource = _handler.PlayerCollection;
         }
 
         private void Start_Host(object sender, RoutedEventArgs e)
@@ -46,6 +44,9 @@ namespace WPF_ServiceBus
 
                 // create an instance of the servicebus handler
                 _handler = new ServiceBusHandler(sessionCode);
+
+                _handler.program.MessageReceived += OnMessageReceived;
+                lv.ItemsSource = _handler.PlayerCollection;
             }
 
             // check if user data is unset

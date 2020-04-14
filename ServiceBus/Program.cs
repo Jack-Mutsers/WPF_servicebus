@@ -54,7 +54,7 @@ namespace ServiceBus
             string subscription = Enum.GetName(typeof(Subscriptions), _SessionData.subscription);
 
             // assign handler
-            _handler = new ServiceBusTopicHandler(_SessionData.connectionString, _SessionData.topic, subscription, ProcessMessagesAsync);
+            _handler = new ServiceBusTopicHandler(_SessionData.connectionString, _SessionData.topic, subscription, ProcessMessages);
             //_handler = new ServiceBusQueueHandler(_SessionData.connectionString, _SessionData.queueName, ProcessMessagesAsync);
         }
 
@@ -72,8 +72,13 @@ namespace ServiceBus
             await _handler.SendMessagesAsync(line, _SessionData.sessionCode);
         }
 
-        public async Task ProcessMessagesAsync(Message message, CancellationToken token)
+        public Task ProcessMessages(IMessageSession messageSession ,Message message, CancellationToken token)
         {
+            if (_SessionData.sessionCode != messageSession.SessionId)
+            {
+                return new Task(() => { });
+            }
+
             // Process the message.
             string val = $"{Encoding.UTF8.GetString(message.Body)}";
 
@@ -82,11 +87,13 @@ namespace ServiceBus
             if (val.StartsWith("{") && val.EndsWith("}") && _handler != null){
 
                 // notify the service bus that the message had been recieved
-                await _handler.completeAsync(message.SystemProperties.LockToken);
+                //await _handler.completeAsync(message.SystemProperties.LockToken);
 
                 // send message to the setResponse method
                 _currentSynchronizationContext.Send(x => setResponse(val), null);
             }
+
+            return new Task(() => { });
         }
         
     }

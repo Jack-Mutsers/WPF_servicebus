@@ -11,7 +11,7 @@ namespace ServiceBus
         ITopicClient topicClient;
         ISubscriptionClient subscriptionClient;
 
-        public ServiceBusTopicHandler(string connectionString, string topic, string subscriptionName, Func<Message, CancellationToken, Task> onMessageRecivedCallBack)
+        public ServiceBusTopicHandler(string connectionString, string topic, string subscriptionName, Func<IMessageSession ,Message, CancellationToken, Task> onMessageRecivedCallBack)
         {
             // create connection link
             topicClient = new TopicClient(connectionString, topic);
@@ -38,30 +38,29 @@ namespace ServiceBus
             }
         }
 
-        void RegisterOnMessageHandlerAndReceiveMessages(Func<Message,CancellationToken,Task> onMessageRecivedCallBack)
+        void RegisterOnMessageHandlerAndReceiveMessages(Func<IMessageSession ,Message,CancellationToken,Task> onMessageRecivedCallBack)
         {
-            // Configure the message handler options in terms of exception handling, number of concurrent messages to deliver, etc.
-            var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler)
+            var sessionHandlerOptions = new SessionHandlerOptions(ExceptionReceivedHandler)
             {
-                // Maximum number of concurrent calls to the callback ProcessMessagesAsync(), set to 1 for simplicity.
-                // Set it according to how many messages the application wants to process in parallel.
-                MaxConcurrentCalls = 1,
+                //// Maximum number of concurrent calls to the callback ProcessMessagesAsync(), set to 1 for simplicity.
+                //// Set it according to how many messages the application wants to process in parallel.
+                MaxConcurrentSessions = 100,
 
-                // Indicates whether the message pump should automatically complete the messages after returning from user callback.
-                // False below indicates the complete operation is handled by the user callback as in ProcessMessagesAsync().
-                AutoComplete = false
+                //// Indicates whether MessagePump should automatically complete the messages after returning from User Callback.
+                //// False below indicates the Complete will be handled by the User Callback as in `ProcessMessagesAsync` below.
+                AutoComplete = true,
             };
 
             // Register the function that processes messages.
-            subscriptionClient.RegisterMessageHandler(onMessageRecivedCallBack, messageHandlerOptions);
+            subscriptionClient.RegisterSessionHandler(onMessageRecivedCallBack, sessionHandlerOptions);
         }
 
-        public async Task completeAsync(string lockToken)
-        {
-            // Complete the message so that it is not received again.
-            // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
-            await subscriptionClient.CompleteAsync(lockToken);
-        }
+        //public async Task completeAsync(string lockToken)
+        //{
+        //    // Complete the message so that it is not received again.
+        //    // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
+        //    await subscriptionClient.CompleteAsync(lockToken);
+        //}
 
         // Use this handler to examine the exceptions received on the message pump.
         Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)
