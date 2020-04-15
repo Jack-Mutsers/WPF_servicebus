@@ -55,12 +55,11 @@ namespace ServiceBus
             subscriptionClient.RegisterSessionHandler(onMessageRecivedCallBack, sessionHandlerOptions);
         }
 
-        //public async Task completeAsync(string lockToken)
-        //{
-        //    // Complete the message so that it is not received again.
-        //    // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
-        //    await subscriptionClient.CompleteAsync(lockToken);
-        //}
+        public void CloseConnection()
+        {
+            subscriptionClient.CloseAsync();
+            topicClient.CloseAsync();
+        }
 
         // Use this handler to examine the exceptions received on the message pump.
         Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)

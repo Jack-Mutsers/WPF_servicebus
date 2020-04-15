@@ -6,7 +6,6 @@ namespace ServiceBus.model
 {
     public class TransferModel
     {
-        public string sessionCode { get; set; }
         public string message { get; set; }
         public MessageType type { get; set; }
 

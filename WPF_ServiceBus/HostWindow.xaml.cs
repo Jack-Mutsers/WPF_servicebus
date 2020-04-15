@@ -46,7 +46,6 @@ namespace WPF_ServiceBus
                 _handler = new ServiceBusHandler(sessionCode);
 
                 _handler.program.MessageReceived += OnMessageReceived;
-                lv.ItemsSource = _handler.PlayerCollection;
             }
 
             // check if user data is unset
@@ -72,6 +71,13 @@ namespace WPF_ServiceBus
         public void OnMessageReceived(string message)
         {
             _handler.HandleMessage(message);
+
+            TransferModel transfer = JsonConvert.DeserializeObject<TransferModel>(message);
+            if (transfer.type == MessageType.Response)
+            {
+                lblSession.Content = _handler.SessionCode;
+                lv.ItemsSource = _handler.PlayerCollection;
+            }
         }
 
         private void btnBack_Click(object sender, RoutedEventArgs e)

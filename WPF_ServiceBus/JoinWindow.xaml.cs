@@ -28,14 +28,6 @@ namespace WPF_ServiceBus
         {
             InitializeComponent();
 
-            _handler.program.MessageReceived += OnMessageReceived;
-            lv.ItemsSource = _handler.PlayerCollection;
-        }
-
-        public void OnMessageReceived(string message)
-        {
-            _handler.HandleMessage(message);
-            int test = 1;
         }
 
         private void btnBack_Click(object sender, RoutedEventArgs e)
@@ -45,12 +37,19 @@ namespace WPF_ServiceBus
             this.Close();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void btnJoin_Click(object sender, RoutedEventArgs e)
         {
-            string sessionCode = tbCode.Text;
 
+            // check if handler is empty, if so create an instance of it
             if (_handler == null)
-                _handler = new ServiceBusHandler(sessionCode);
+            {
+                string sessionCode = tbCode.Text;
+
+                // create an instance of the servicebus handler
+                _handler = new ServiceBusHandler(sessionCode, true);
+
+                _handler.program.MessageReceived += OnMessageReceived;
+            }
 
             if (_handler.self == null) 
             {
@@ -62,7 +61,19 @@ namespace WPF_ServiceBus
 
                 string message = JsonConvert.SerializeObject(player);
 
-                _handler.SendMessage(message, MessageType.JoinRequest, sessionCode);
+                _handler.SendMessage(message, MessageType.JoinRequest);
+            }
+        }
+
+        public void OnMessageReceived(string message)
+        {
+            _handler.HandleMessage(message);
+
+            TransferModel transfer = JsonConvert.DeserializeObject<TransferModel>(message);
+            if (transfer.type == MessageType.Response)
+            {
+                lblSession.Content = _handler.SessionCode;
+                lv.ItemsSource = _handler.PlayerCollection;
             }
         }
     }

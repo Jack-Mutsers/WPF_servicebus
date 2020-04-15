@@ -14,12 +14,10 @@ namespace WPF_ServiceBus.Logics
     public class ServiceBusHandler
     {
         public Program program { get; private set; }
-        private string _sessionCode { get; set; } = "AB12RB";
 
         public string SessionCode
         {
-            get { return _sessionCode; }
-            set { _sessionCode = value; }
+            get { return program.SessionData.sessionCode; }
         }
 
         private ObservableCollection<PlayerModel> playerCollection = new ObservableCollection<PlayerModel>();
@@ -27,32 +25,35 @@ namespace WPF_ServiceBus.Logics
         public ObservableCollection<PlayerModel> PlayerCollection
         {
             get { return playerCollection; }
-            set { playerCollection = value; }
+            private set { playerCollection = value; }
         }
 
         public List<PlayerModel> PlayerList
         {
             get { return playerCollection.ToList(); }
-            set { PlayerCollection = new ObservableCollection<PlayerModel>(value); }
         }
 
-        public PlayerModel self { get; set; }
+        public PlayerModel self 
+        {
+            get { return program.User; }
+            set { program.User = value; }
+        }
 
-        public ServiceBusHandler(string sessionCode)
+        public ServiceBusHandler(string sessionCode, bool test = false)
         {
             program = new Program();
 
             // set connection data
             SessionData data = new SessionData();
 
-            // queue connection string
-            //data.connectionString = "Endpoint=sb://proftaak-test.servicebus.windows.net/;SharedAccessKeyName=chat;SharedAccessKey=J21bM387fclbAHaENUvHDH6KrI85aAGRtc9b/cGtLhY=";
-            
             // topic connection string
             data.connectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=AccessManagement;SharedAccessKey=7fPwUZb0t5nxmd15min/ubFom/yGK5ryf9or31tdjog=;";
 
             data.topic = "chat";
+            
+            //data.subscription = test? Subscriptions.ChannelTwo : Subscriptions.Join;
             data.subscription = Subscriptions.Join;
+            
             data.queueName = "myfirstchat";
             data.sessionCode = sessionCode;
 
@@ -70,13 +71,10 @@ namespace WPF_ServiceBus.Logics
             program.UpdateSubscription(subscription);
         }
 
-        public void SendMessage(string message, MessageType type, string sessionCode = "")
+        public void SendMessage(string message, MessageType type)
         {
-            // check if a sessionCode already exists, if not use given sessionCode
-            _sessionCode = sessionCode == "" ? _sessionCode : sessionCode;
-
             // sent requested message
-            program.SendMessage(message, type, _sessionCode);
+            program.SendMessage(message, type);
         }
 
         public void HandleMessage(string message)
@@ -91,12 +89,12 @@ namespace WPF_ServiceBus.Logics
                 // check if message type is JoinRequest, so we know how to decode the message inside the transfer object and we know how to use it
                 if (transfer.type == MessageType.JoinRequest)
                 {
-                    // decode message
-                    source = JsonConvert.DeserializeObject<PlayerModel>(transfer.message);
-
                     //check if the player is the host, because only the host may handel messages of the type JoinRequest
                     if (self.type == PlayerType.Host)
                     {
+                        // decode message
+                        source = JsonConvert.DeserializeObject<PlayerModel>(transfer.message);
+
                         // count amount of people in the game
                         int playerCount = PlayerList.Count();
 
@@ -110,11 +108,16 @@ namespace WPF_ServiceBus.Logics
                             source.orderNumber = ++playerCount;
 
                             // add new player to the player list
-                            PlayerCollection.Add(source);
+                            List<PlayerModel> players = playerCollection.ToList();
+                            players.Add(source);
+
+                            // add new player to player list if the host is already assigned
+                            //if (PlayerList.Count() > 0)
+                            //    playerCollection.Add(source);
 
                             // create response model
                             SessionResponseModel response = new SessionResponseModel();
-                            response.playerList = PlayerList;
+                            response.playerList = players;
                             response.Player = source;
                             response.accepted = true;
 
@@ -146,7 +149,7 @@ namespace WPF_ServiceBus.Logics
                     SessionResponseModel response = JsonConvert.DeserializeObject<SessionResponseModel>(transfer.message);
                     PlayerModel player = response.Player;
 
-                    PlayerList = response.playerList;
+                    PlayerCollection = new ObservableCollection<PlayerModel>(response.playerList);
 
                     if (player.userId == self.userId && player.name == self.name && player.type == self.type)
                     {
@@ -155,8 +158,6 @@ namespace WPF_ServiceBus.Logics
                     }
                 }
             }
-
-            int test = 1;
         }
     }
 }
