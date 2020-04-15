@@ -39,8 +39,9 @@ namespace WPF_ServiceBus.Logics
             set { program.User = value; }
         }
 
-        public ServiceBusHandler(string sessionCode, bool test = false)
+        public ServiceBusHandler(string sessionCode)
         {
+            // create new instance of program
             program = new Program();
 
             // set connection data
@@ -48,12 +49,8 @@ namespace WPF_ServiceBus.Logics
 
             // topic connection string
             data.connectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=AccessManagement;SharedAccessKey=7fPwUZb0t5nxmd15min/ubFom/yGK5ryf9or31tdjog=;";
-
             data.topic = "chat";
-            
-            //data.subscription = test? Subscriptions.ChannelTwo : Subscriptions.Join;
             data.subscription = Subscriptions.Join;
-            
             data.queueName = "myfirstchat";
             data.sessionCode = sessionCode;
 
@@ -63,11 +60,13 @@ namespace WPF_ServiceBus.Logics
 
         public ServiceBusHandler(Program existingProgram)
         {
+            // store instance of program with the session data for use
             program = existingProgram;
         }
 
         public void ChangeSubscription(Subscriptions subscription)
         {
+            // change to the assigned subscription
             program.UpdateSubscription(subscription);
         }
 
@@ -111,10 +110,6 @@ namespace WPF_ServiceBus.Logics
                             List<PlayerModel> players = playerCollection.ToList();
                             players.Add(source);
 
-                            // add new player to player list if the host is already assigned
-                            //if (PlayerList.Count() > 0)
-                            //    playerCollection.Add(source);
-
                             // create response model
                             SessionResponseModel response = new SessionResponseModel();
                             response.playerList = players;
@@ -144,16 +139,27 @@ namespace WPF_ServiceBus.Logics
                     }
                 }
 
+                // check if the message type is response
                 if (transfer.type == MessageType.Response)
                 {
+                    // message type is response
+                    // decode message to SessionResponseModel
                     SessionResponseModel response = JsonConvert.DeserializeObject<SessionResponseModel>(transfer.message);
+                    
+                    // get the player from the response model
                     PlayerModel player = response.Player;
 
+                    // update the player collection with the newly joinend players
                     PlayerCollection = new ObservableCollection<PlayerModel>(response.playerList);
 
+                    // check if the response is meant for me
                     if (player.userId == self.userId && player.name == self.name && player.type == self.type)
                     {
+                        // the response is for me
+                        // update player data
                         self = player;
+
+                        // change to the correct subscription
                         ChangeSubscription(response.subscription);
                     }
                 }

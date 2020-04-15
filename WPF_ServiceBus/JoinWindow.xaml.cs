@@ -46,7 +46,7 @@ namespace WPF_ServiceBus
                 string sessionCode = tbCode.Text;
 
                 // create an instance of the servicebus handler
-                _handler = new ServiceBusHandler(sessionCode, true);
+                _handler = new ServiceBusHandler(sessionCode);
 
                 _handler.program.MessageReceived += OnMessageReceived;
             }

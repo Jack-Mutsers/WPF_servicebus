@@ -15,6 +15,7 @@ namespace ServiceBus
         private IServiceBusHandler _handler;
         public SessionData SessionData { get; private set; }
         public PlayerModel User { get; set; }
+
         private SynchronizationContext _currentSynchronizationContext; // Needed to Synchronize between threads, Service buss handler is called from another thread
 
         public delegate void DataReceivedEventHandler(string source);

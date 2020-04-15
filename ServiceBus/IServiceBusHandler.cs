@@ -10,6 +10,5 @@ namespace ServiceBus
     {
         Task SendMessagesAsync(string message, string sessionCode);
         void CloseConnection();
-        //Task completeAsync(string lockToken);
     }
 }
