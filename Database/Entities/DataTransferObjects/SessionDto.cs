@@ -6,8 +6,8 @@ namespace Database.Entities.DataTransferObjects
 {
     class SessionDto
     {
-        int id { get; set; }
-        bool active { get; set; }
-        string session_code { get; set; }
+        public int id { get; set; }
+        public bool active { get; set; }
+        public string session_code { get; set; }
     }
 }

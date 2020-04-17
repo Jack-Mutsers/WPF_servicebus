@@ -3,6 +3,7 @@ using Database.Entities;
 using Database.Entities.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Database.Repository
@@ -13,22 +14,22 @@ namespace Database.Repository
 
         public void CreatePlayer(Player player)
         {
-            throw new NotImplementedException();
+            Create(player);
         }
 
         public void DeletePlayer(Player player)
         {
-            throw new NotImplementedException();
+            Update(player);
         }
 
         public Player GetPlayerById(Guid player_Id)
         {
-            throw new NotImplementedException();
+            return FindByCondition(player => player.userId.Equals(player_Id)).FirstOrDefault();
         }
 
         public void UpdatePlayer(Player player)
         {
-            throw new NotImplementedException();
+            Update(player);
         }
     }
 }

@@ -7,9 +7,9 @@ namespace Database.Entities.DataTransferObjects
 {
     class PlayerForCreationDto
     {
-        string name { get; set; }
-        int orderNumber { get; set; }
-        bool ready { get; set; }
-        PlayerType type { get; set; }
+        public string name { get; set; }
+        public int orderNumber { get; set; }
+        public bool ready { get; set; }
+        public PlayerType type { get; set; }
     }
 }

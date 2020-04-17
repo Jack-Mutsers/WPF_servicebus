@@ -9,10 +9,10 @@ namespace Database.Entities.Models
 {
     public class Player
     {
-        Guid userId { get; set; } = Guid.NewGuid();
-        string name { get; set; }
-        int orderNumber { get; set; } = 0;
-        bool ready { get; set; } = false;
-        PlayerType type { get; set; } = PlayerType.Guest;
+        public Guid userId { get; set; } = Guid.NewGuid();
+        public string name { get; set; }
+        public int orderNumber { get; set; } = 0;
+        public bool ready { get; set; } = false;
+        public PlayerType type { get; set; } = PlayerType.Guest;
     }
 }

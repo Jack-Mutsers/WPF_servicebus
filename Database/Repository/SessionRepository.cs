@@ -3,6 +3,7 @@ using Database.Entities;
 using Database.Entities.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Database.Repository
@@ -13,22 +14,24 @@ namespace Database.Repository
 
         public void CreateSession(Session session)
         {
-            throw new NotImplementedException();
+            Create(session);
         }
 
         public void DeleteSession(Session session)
         {
-            throw new NotImplementedException();
+            session.active = false;
+            Update(session);
         }
 
         public void UpdateSession(Session session)
         {
-            throw new NotImplementedException();
+            Update(session);
         }
 
         public bool ValidateIfActive(string sessionCode)
         {
-            throw new NotImplementedException();
+            int count = FindByCondition(session => session.active == true && session.session_code == sessionCode).Count();
+            return count > 0;
         }
     }
 }

@@ -6,8 +6,8 @@ namespace Database.Entities.Models
 {
     public class Session
     {
-        int id { get; set; }
-        bool active { get; set; } = true;
-        string session_code { get; set; }
+        public int id { get; set; }
+        public bool active { get; set; } = true;
+        public string session_code { get; set; }
     }
 }
