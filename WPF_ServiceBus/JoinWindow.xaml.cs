@@ -1,5 +1,6 @@
-﻿using Newtonsoft.Json;
-using ServiceBus.model;
+﻿using Database.Entities.Enums;
+using Newtonsoft.Json;
+using ServiceBus.Entities.models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +54,7 @@ namespace WPF_ServiceBus
 
             if (_handler.self == null) 
             {
-                PlayerModel player = new PlayerModel();
+                Player player = new Player();
                 player.name = tbName.Text;
                 player.type = PlayerType.Guest;
 
@@ -69,7 +70,7 @@ namespace WPF_ServiceBus
         {
             _handler.HandleMessage(message);
 
-            TransferModel transfer = JsonConvert.DeserializeObject<TransferModel>(message);
+            Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
             if (transfer.type == MessageType.Response)
             {
                 lblSession.Content = _handler.SessionCode;

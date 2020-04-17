@@ -1,5 +1,6 @@
-﻿using Newtonsoft.Json;
-using ServiceBus.model;
+﻿using Database.Entities.Enums;
+using Newtonsoft.Json;
+using ServiceBus.Entities.models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace WPF_ServiceBus
     public partial class PlayingField : Window
     {
         ServiceBusHandler initialiser = new ServiceBusHandler("AB12R");
-        CoordinatesModel coordinates { get; set; }
+        Coordinates coordinates { get; set; }
 
         void addLogItem(string text)
         {
@@ -42,10 +43,10 @@ namespace WPF_ServiceBus
 
         private void shoot_Click(object sender, RoutedEventArgs e)
         {
-            ActionModel actionModel = new ActionModel();
+            GameAction actionModel = new GameAction();
             if (coordinates != null)
             {
-                actionModel.action = ActionModel.Action.shoot;
+                actionModel.action = PlayerAction.shoot;
                 actionModel.coordinates = coordinates;
                 actionModel.sessionCode = "ab6ER8";
 
@@ -63,9 +64,9 @@ namespace WPF_ServiceBus
 
         private void surrender_Click(object sender, RoutedEventArgs e)
         {
-            ActionModel actionModel = new ActionModel();
+            GameAction actionModel = new GameAction();
 
-            actionModel.action = ActionModel.Action.surender;
+            actionModel.action = PlayerAction.surender;
             actionModel.sessionCode = "ab6ER8";
 
             string message = JsonConvert.SerializeObject(actionModel);
@@ -76,7 +77,7 @@ namespace WPF_ServiceBus
 
         private void OnPreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            coordinates = new CoordinatesModel();
+            coordinates = new Coordinates();
             var point = Mouse.GetPosition(myGrid);
 
             double accumulatedHeight = 0.0;
@@ -109,11 +110,11 @@ namespace WPF_ServiceBus
 
         public void OnMessageReceived(string message)
         {
-            TransferModel transfer = JsonConvert.DeserializeObject<TransferModel>(message);
+            Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
 
             if (transfer.type == MessageType.Action)
             {
-                ActionModel source = JsonConvert.DeserializeObject<ActionModel>(transfer.message);
+                Action source = JsonConvert.DeserializeObject<Action>(transfer.message);
                 responseGrid.DataContext = source;
             }
 

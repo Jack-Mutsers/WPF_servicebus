@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Database.Entities.Enums;
+using Newtonsoft.Json;
 using ServiceBus;
-using ServiceBus.model;
+using ServiceBus.Entities.models;
 using ServiceBus.session;
 using System;
 using System.Collections.Generic;
@@ -20,20 +21,20 @@ namespace WPF_ServiceBus.Logics
             get { return program.SessionData.sessionCode; }
         }
 
-        private ObservableCollection<PlayerModel> playerCollection = new ObservableCollection<PlayerModel>();
+        private ObservableCollection<Player> playerCollection = new ObservableCollection<Player>();
 
-        public ObservableCollection<PlayerModel> PlayerCollection
+        public ObservableCollection<Player> PlayerCollection
         {
             get { return playerCollection; }
             private set { playerCollection = value; }
         }
 
-        public List<PlayerModel> PlayerList
+        public List<Player> PlayerList
         {
             get { return playerCollection.ToList(); }
         }
 
-        public PlayerModel self 
+        public Player self 
         {
             get { return program.User; }
             set { program.User = value; }
@@ -82,8 +83,8 @@ namespace WPF_ServiceBus.Logics
             if (self != null)
             {
                 // decode message
-                TransferModel transfer = JsonConvert.DeserializeObject<TransferModel>(message);
-                PlayerModel source;
+                Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
+                Player source;
 
                 // check if message type is JoinRequest, so we know how to decode the message inside the transfer object and we know how to use it
                 if (transfer.type == MessageType.JoinRequest)
@@ -92,7 +93,7 @@ namespace WPF_ServiceBus.Logics
                     if (self.type == PlayerType.Host)
                     {
                         // decode message
-                        source = JsonConvert.DeserializeObject<PlayerModel>(transfer.message);
+                        source = JsonConvert.DeserializeObject<Player>(transfer.message);
 
                         // count amount of people in the game
                         int playerCount = PlayerList.Count();
@@ -107,11 +108,11 @@ namespace WPF_ServiceBus.Logics
                             source.orderNumber = ++playerCount;
 
                             // add new player to the player list
-                            List<PlayerModel> players = playerCollection.ToList();
+                            List<Player> players = playerCollection.ToList();
                             players.Add(source);
 
                             // create response model
-                            SessionResponseModel response = new SessionResponseModel();
+                            SessionResponse response = new SessionResponse();
                             response.playerList = players;
                             response.Player = source;
                             response.accepted = true;
@@ -144,13 +145,13 @@ namespace WPF_ServiceBus.Logics
                 {
                     // message type is response
                     // decode message to SessionResponseModel
-                    SessionResponseModel response = JsonConvert.DeserializeObject<SessionResponseModel>(transfer.message);
+                    SessionResponse response = JsonConvert.DeserializeObject<SessionResponse>(transfer.message);
                     
                     // get the player from the response model
-                    PlayerModel player = response.Player;
+                    Player player = response.Player;
 
                     // update the player collection with the newly joinend players
-                    PlayerCollection = new ObservableCollection<PlayerModel>(response.playerList);
+                    PlayerCollection = new ObservableCollection<Player>(response.playerList);
 
                     // check if the response is meant for me
                     if (player.userId == self.userId && player.name == self.name && player.type == self.type)

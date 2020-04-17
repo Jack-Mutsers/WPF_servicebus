@@ -3,10 +3,12 @@ using Newtonsoft.Json;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ServiceBus.model;
+using ServiceBus.Entities.models;
 using ServiceBus.session;
 using System.Collections.Generic;
 using System;
+using Database.Entities.Enums;
+using ServiceBus.Handlers;
 
 namespace ServiceBus
 {
@@ -14,7 +16,7 @@ namespace ServiceBus
     {
         private IServiceBusHandler _handler;
         public SessionData SessionData { get; private set; }
-        public PlayerModel User { get; set; }
+        public Player User { get; set; }
 
         private SynchronizationContext _currentSynchronizationContext; // Needed to Synchronize between threads, Service buss handler is called from another thread
 
@@ -32,8 +34,14 @@ namespace ServiceBus
             // set assigned subscription
             SessionData.subscription = subscription;
 
+            // convert subscription emum to string
+            string subscriptionName = Enum.GetName(typeof(Subscriptions), SessionData.subscription);
+
+            // assign handler
+            _handler.SetSubscriptionAsync(SessionData.connectionString, SessionData.topic, subscriptionName, ProcessMessagesAsync);
+
             // create new handler with the new subscription
-            SetData(SessionData);
+            //SetData(SessionData);
         }
 
         private void DoNothing(string message){ } // this is required for the event, so we can use the event in another class
@@ -51,24 +59,24 @@ namespace ServiceBus
 
             if (_handler != null)
             {
-                _handler.CloseConnection();
+                //_handler.CloseConnection();
             }
 
             // make sure handler is clear before setting a new one
             _handler = null;
 
             // convert subscription emum to string
-            string subscription = Enum.GetName(typeof(Subscriptions), SessionData.subscription);
+            string subscriptionName = Enum.GetName(typeof(Subscriptions), SessionData.subscription);
 
             // assign handler
-            _handler = new ServiceBusTopicHandler(SessionData.connectionString, SessionData.topic, subscription, ProcessMessagesAsync);
+            _handler = new ServiceBusTopicHandler(SessionData.connectionString, SessionData.topic, subscriptionName, ProcessMessagesAsync);
             //_handler = new ServiceBusQueueHandler(_SessionData.connectionString, _SessionData.queueName, ProcessMessagesAsync);
         }
 
         public async void SendMessage(string message, MessageType type)
         {
             // create trasfer model to differentiate between message types
-            TransferModel transfer = new TransferModel();
+            Transfer transfer = new Transfer();
             transfer.message = message;
             transfer.type = type;
 
@@ -94,14 +102,14 @@ namespace ServiceBus
             if (val.StartsWith("{") && val.EndsWith("}") && _handler != null){
 
                 // decode the json
-                TransferModel transfer = JsonConvert.DeserializeObject<TransferModel>(val);
+                Transfer transfer = JsonConvert.DeserializeObject<Transfer>(val);
 
                 // check if the transfer type of the response type is and check if the application is still on the join subscription
                 if (transfer.type == MessageType.Response && SessionData.subscription == Subscriptions.Join)
                 {
                     // I am still waiting for my session response
                     // decode the response
-                    var responseModel = JsonConvert.DeserializeObject<SessionResponseModel>(transfer.message);
+                    var responseModel = JsonConvert.DeserializeObject<SessionResponse>(transfer.message);
 
                     // check if the response is meant for me
                     if (responseModel.Player.userId != User.userId)
