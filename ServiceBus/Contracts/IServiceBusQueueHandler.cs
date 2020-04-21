@@ -8,10 +8,8 @@ using System.Threading.Tasks;
 
 namespace ServiceBus
 {
-    public interface IServiceBusHandler
+    public interface IServiceBusQueueHandler
     {
         Task SendMessagesAsync(string message, string sessionCode);
-        void CloseConnection();
-        void SetSubscriptionAsync(string connectionString, string topic, string subscriptionName, Func<IMessageSession, Message, CancellationToken, Task> onMessageRecivedCallBack);
     }
 }

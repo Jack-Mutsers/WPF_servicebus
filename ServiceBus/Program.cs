@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceBus.Entities.models;
-using ServiceBus.session;
+using ServiceBus.Data;
 using System.Collections.Generic;
 using System;
 using Database.Entities.Enums;
@@ -14,8 +14,10 @@ namespace ServiceBus
 {
     public class Program
     {
-        private IServiceBusHandler _handler;
-        public SessionData SessionData { get; private set; }
+        private IServiceBusQueueHandler _QueueHandler;
+        private IServiceBusTopicHandler _TopicHandler;
+        public QueueData QueueData { get; private set; }
+        public TopicData TopicData { get; private set; }
         public Player User { get; set; }
 
         private SynchronizationContext _currentSynchronizationContext; // Needed to Synchronize between threads, Service buss handler is called from another thread
@@ -29,21 +31,6 @@ namespace ServiceBus
             _currentSynchronizationContext = SynchronizationContext.Current;
         }
 
-        public void UpdateSubscription(Subscriptions subscription)
-        {
-            // set assigned subscription
-            SessionData.subscription = subscription;
-
-            // convert subscription emum to string
-            string subscriptionName = Enum.GetName(typeof(Subscriptions), SessionData.subscription);
-
-            // assign handler
-            _handler.SetSubscriptionAsync(SessionData.connectionString, SessionData.topic, subscriptionName, ProcessMessagesAsync);
-
-            // create new handler with the new subscription
-            //SetData(SessionData);
-        }
-
         private void DoNothing(string message){ } // this is required for the event, so we can use the event in another class
 
         public void setResponse(string message)
@@ -52,28 +39,37 @@ namespace ServiceBus
             MessageReceived(message);
         }
 
-        public void SetData(SessionData data)
+        public void StoreTopicData(TopicData data)
         {
             // set the session data
-            SessionData = data;
-
-            if (_handler != null)
-            {
-                //_handler.CloseConnection();
-            }
-
-            // make sure handler is clear before setting a new one
-            _handler = null;
-
-            // convert subscription emum to string
-            string subscriptionName = Enum.GetName(typeof(Subscriptions), SessionData.subscription);
-
-            // assign handler
-            _handler = new ServiceBusTopicHandler(SessionData.connectionString, SessionData.topic, subscriptionName, ProcessMessagesAsync);
-            //_handler = new ServiceBusQueueHandler(_SessionData.connectionString, _SessionData.queueName, ProcessMessagesAsync);
+            TopicData = data;
         }
 
-        public async void SendMessage(string message, MessageType type)
+        public void SetTopicData()
+        {
+            // make sure handler is clear before setting a new one
+            _TopicHandler = null;
+
+            // convert subscription emum to string
+            string subscriptionName = Enum.GetName(typeof(Subscriptions), TopicData.subscription);
+
+            // assign handler
+            _TopicHandler = new ServiceBusTopicHandler(TopicData.TopicConnectionString, TopicData.topic, subscriptionName, ProcessTopicMessagesAsync);
+        }
+
+        public void SetQueueData(QueueData data)
+        {
+            // set the session data
+            QueueData = data;
+
+            // make sure handler is clear before setting a new one
+            _QueueHandler = null;
+
+            // assign handler
+            _QueueHandler = new ServiceBusQueueHandler(data.QueueConnectionString, data.queueName, ProcessQueueSessionAsync);
+        }
+
+        public async void SendQueueMessage(string message, MessageType type)
         {
             // create trasfer model to differentiate between message types
             Transfer transfer = new Transfer();
@@ -84,13 +80,43 @@ namespace ServiceBus
             string line = JsonConvert.SerializeObject(transfer);
 
             // sent the message string to the service bus
-            await _handler.SendMessagesAsync(line, SessionData.sessionCode);
+            await _QueueHandler.SendMessagesAsync(line, QueueData.sessionCode);
         }
 
-        public async Task ProcessMessagesAsync(IMessageSession messageSession, Message message, CancellationToken token)
+        public async void SendTopicMessage(string message, MessageType type)
+        {
+            // create trasfer model to differentiate between message types
+            Transfer transfer = new Transfer();
+            transfer.message = message;
+            transfer.type = type;
+
+            // convert trasfer model to string for transfere
+            string line = JsonConvert.SerializeObject(transfer);
+
+            // sent the message string to the service bus
+            await _TopicHandler.SendMessagesAsync(line);
+        }
+
+        public async Task ProcessTopicMessagesAsync(Message message, CancellationToken token)
+        {
+            // Process the message.
+            string val = $"{Encoding.UTF8.GetString(message.Body)}";
+
+            // check if the message is json encoded
+            if (val.StartsWith("{") && val.EndsWith("}") && _TopicHandler != null){
+
+                // close recieved message
+                await _TopicHandler.CompleteMessageAsync(message.SystemProperties.LockToken);
+
+                // send message to the setResponse method
+                _currentSynchronizationContext.Send(x => setResponse(val), null);
+            }
+        }
+
+        public async Task ProcessQueueSessionAsync(IMessageSession messageSession, Message message, CancellationToken token)
         {
             // check if the message is for me by compairing the session code
-            if (SessionData.sessionCode != messageSession.SessionId)
+            if (QueueData.sessionCode != messageSession.SessionId)
             {
                 return;
             }
@@ -99,13 +125,14 @@ namespace ServiceBus
             string val = $"{Encoding.UTF8.GetString(message.Body)}";
 
             // check if the message is json encoded
-            if (val.StartsWith("{") && val.EndsWith("}") && _handler != null){
+            if (val.StartsWith("{") && val.EndsWith("}") && _QueueHandler != null)
+            {
 
                 // decode the json
                 Transfer transfer = JsonConvert.DeserializeObject<Transfer>(val);
 
                 // check if the transfer type of the response type is and check if the application is still on the join subscription
-                if (transfer.type == MessageType.Response && SessionData.subscription == Subscriptions.Join)
+                if (transfer.type == MessageType.Response)
                 {
                     // I am still waiting for my session response
                     // decode the response
@@ -126,6 +153,5 @@ namespace ServiceBus
             // complete the message so it is not recieved by anyone else
             await Task.CompletedTask;
         }
-        
     }
 }

@@ -62,13 +62,13 @@ namespace WPF_ServiceBus
 
                 string message = JsonConvert.SerializeObject(player);
 
-                _handler.SendMessage(message, MessageType.JoinRequest);
+                _handler.SendQueueMessage(message, MessageType.JoinRequest);
             }
         }
 
         public void OnMessageReceived(string message)
         {
-            _handler.HandleMessage(message);
+            _handler.HandleQueueMessage(message);
 
             Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
             if (transfer.type == MessageType.Response)

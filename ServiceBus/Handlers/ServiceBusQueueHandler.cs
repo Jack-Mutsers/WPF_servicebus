@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ServiceBus.Handlers
 {
-    public class ServiceBusQueueHandler// : IServiceBusHandler
+    public class ServiceBusQueueHandler : IServiceBusQueueHandler
     {
         static IQueueClient _queueClient;
 
@@ -71,16 +71,5 @@ namespace ServiceBus.Handlers
             return Task.CompletedTask;
         }
 
-        public async Task completeAsync(string lockToken)
-        {
-            // Complete the message so that it is not received again.
-            // This can be done only if the queue Client is created in ReceiveMode.PeekLock mode (which is the default).
-            await _queueClient.CompleteAsync(lockToken);
-        }
-
-        public void CloseConnection()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

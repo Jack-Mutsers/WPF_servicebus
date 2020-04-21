@@ -1,7 +1,7 @@
 ﻿using Database.Entities.Enums;
 using Newtonsoft.Json;
 using ServiceBus.Entities.models;
-using ServiceBus.session;
+using ServiceBus.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,13 +65,13 @@ namespace WPF_ServiceBus
                 string message = JsonConvert.SerializeObject(player);
 
                 // sent player data in a join request
-                _handler.SendMessage(message, MessageType.JoinRequest);
+                _handler.SendQueueMessage(message, MessageType.JoinRequest);
             }
         }
 
         public void OnMessageReceived(string message)
         {
-            _handler.HandleMessage(message);
+            _handler.HandleQueueMessage(message);
 
             Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
             if (transfer.type == MessageType.Response)

@@ -6,28 +6,13 @@ using System.Threading.Tasks;
 
 namespace ServiceBus.Handlers
 {
-    public class ServiceBusTopicHandler : IServiceBusHandler
+    public class ServiceBusTopicHandler : IServiceBusTopicHandler
     {
         ITopicClient topicClient;
         ISubscriptionClient subscriptionClient;
 
-        public ServiceBusTopicHandler(string connectionString, string topic, string subscriptionName, Func<IMessageSession ,Message, CancellationToken, Task> onMessageRecivedCallBack)
+        public ServiceBusTopicHandler(string connectionString, string topic, string subscriptionName, Func<Message, CancellationToken, Task> onMessageRecivedCallBack)
         {
-            SetSubscriptionAsync(connectionString, topic, subscriptionName, onMessageRecivedCallBack);
-        }
-
-        public async void SetSubscriptionAsync(string connectionString, string topic, string subscriptionName, Func<IMessageSession, Message, CancellationToken, Task> onMessageRecivedCallBack)
-        {
-            if (topicClient != null)
-            {
-                await topicClient.CloseAsync();
-            }
-            
-            if (subscriptionClient != null)
-            {
-                await subscriptionClient.CloseAsync();
-            }
-
             // create connection link
             topicClient = new TopicClient(connectionString, topic);
             subscriptionClient = new SubscriptionClient(connectionString, topic, subscriptionName);
@@ -36,13 +21,13 @@ namespace ServiceBus.Handlers
             RegisterOnMessageHandlerAndReceiveMessages(onMessageRecivedCallBack);
         }
 
-        public async Task SendMessagesAsync(string message, string sessionCode)
+        public async Task SendMessagesAsync(string message)
         {
             try
             {
                 // Create a new message to send to the topic.
                 var encodedMessage = new Message(Encoding.UTF8.GetBytes(message));
-                encodedMessage.SessionId = sessionCode;
+                //encodedMessage.SessionId = sessionCode;
 
                 // Send the message to the topic.
                 await topicClient.SendAsync(encodedMessage);
@@ -53,27 +38,32 @@ namespace ServiceBus.Handlers
             }
         }
 
-        void RegisterOnMessageHandlerAndReceiveMessages(Func<IMessageSession ,Message,CancellationToken,Task> onMessageRecivedCallBack)
+        public async Task CompleteMessageAsync(string lockToken)
         {
-            var sessionHandlerOptions = new SessionHandlerOptions(ExceptionReceivedHandler)
-            {
-                //// Maximum number of concurrent calls to the callback ProcessMessagesAsync(), set to 1 for simplicity.
-                //// Set it according to how many messages the application wants to process in parallel.
-                MaxConcurrentSessions = 100,
+            // Complete the message so that it is not received again.
+            // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
+            await subscriptionClient.CompleteAsync(lockToken);
 
-                //// Indicates whether MessagePump should automatically complete the messages after returning from User Callback.
-                //// False below indicates the Complete will be handled by the User Callback as in `ProcessMessagesAsync` below.
-                AutoComplete = true,
+            // Note: Use the cancellationToken passed as necessary to determine if the subscriptionClient has already been closed.
+            // If subscriptionClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.
+            // to avoid unnecessary exceptions.
+        }
+
+        void RegisterOnMessageHandlerAndReceiveMessages(Func<Message,CancellationToken,Task> onMessageRecivedCallBack)
+        {
+            var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler)
+            {
+                // Maximum number of concurrent calls to the callback ProcessMessagesAsync(), set to 1 for simplicity.
+                // Set it according to how many messages the application wants to process in parallel.
+                MaxConcurrentCalls = 1,
+
+                // Indicates whether the message pump should automatically complete the messages after returning from user callback.
+                // False below indicates the complete operation is handled by the user callback as in ProcessMessagesAsync().
+                AutoComplete = false
             };
 
             // Register the function that processes messages.
-            subscriptionClient.RegisterSessionHandler(onMessageRecivedCallBack, sessionHandlerOptions);
-        }
-
-        public async void CloseConnection()
-        {
-            //await subscriptionClient.CloseAsync();
-            //await topicClient.CloseAsync();
+            subscriptionClient.RegisterMessageHandler(onMessageRecivedCallBack, messageHandlerOptions);
         }
 
         // Use this handler to examine the exceptions received on the message pump.

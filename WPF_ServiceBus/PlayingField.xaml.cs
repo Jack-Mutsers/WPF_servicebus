@@ -52,7 +52,7 @@ namespace WPF_ServiceBus
 
                 string message = JsonConvert.SerializeObject(actionModel);
 
-                initialiser.SendMessage(message, MessageType.Action);
+                initialiser.SendTopicMessage(message, MessageType.Action);
 
                 addLogItem("shooting data send");
             }
@@ -71,7 +71,7 @@ namespace WPF_ServiceBus
 
             string message = JsonConvert.SerializeObject(actionModel);
 
-            initialiser.SendMessage(message, MessageType.Action);
+            initialiser.SendTopicMessage(message, MessageType.Action);
             addLogItem("you chose to surender");
         }
 

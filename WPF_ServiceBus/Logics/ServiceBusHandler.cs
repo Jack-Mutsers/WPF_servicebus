@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using ServiceBus;
 using ServiceBus.Entities.models;
-using ServiceBus.session;
+using ServiceBus.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,7 +18,7 @@ namespace WPF_ServiceBus.Logics
 
         public string SessionCode
         {
-            get { return program.SessionData.sessionCode; }
+            get { return program.QueueData.sessionCode; }
         }
 
         private ObservableCollection<Player> playerCollection = new ObservableCollection<Player>();
@@ -46,38 +46,37 @@ namespace WPF_ServiceBus.Logics
             program = new Program();
 
             // set connection data
-            SessionData data = new SessionData();
+            QueueData data = new QueueData();
 
             // topic connection string
-            data.connectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=AccessManagement;SharedAccessKey=7fPwUZb0t5nxmd15min/ubFom/yGK5ryf9or31tdjog=;";
-            data.topic = "chat";
-            data.subscription = Subscriptions.Join;
-            data.queueName = "myfirstchat";
+            data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=queueAccess;SharedAccessKey=N6QTxPjNMav7V8IhHOm8mN9c0XAjK9Ey5V95vcqMDis=;";
+            data.queueName = "join";
             data.sessionCode = sessionCode;
 
             // pass over connection data
-            program.SetData(data);
+            program.SetQueueData(data);
         }
 
         public ServiceBusHandler(Program existingProgram)
         {
             // store instance of program with the session data for use
             program = existingProgram;
+            program.SetTopicData();
         }
 
-        public void ChangeSubscription(Subscriptions subscription)
-        {
-            // change to the assigned subscription
-            program.UpdateSubscription(subscription);
-        }
-
-        public void SendMessage(string message, MessageType type)
+        public void SendQueueMessage(string message, MessageType type)
         {
             // sent requested message
-            program.SendMessage(message, type);
+            program.SendQueueMessage(message, type);
         }
 
-        public void HandleMessage(string message)
+        public void SendTopicMessage(string message, MessageType type)
+        {
+            // sent requested message
+            program.SendTopicMessage(message, type);
+        }
+
+        public void HandleQueueMessage(string message)
         {
             // check if player is identified
             if (self != null)
@@ -116,25 +115,27 @@ namespace WPF_ServiceBus.Logics
                             response.playerList = players;
                             response.Player = source;
                             response.accepted = true;
+                            response.topicData.TopicConnectionString = program.TopicData.TopicConnectionString; // get newly created topic connection string
+                            response.topicData.topic = program.TopicData.topic; // get newly created topic name
 
                             // check what channel will be assigned to the new player
                             if (playerCount == 1)
-                                response.subscription = Subscriptions.ChannelOne;
+                                response.topicData.subscription = Subscriptions.ChannelOne;
 
                             if (playerCount == 2)
-                                response.subscription = Subscriptions.ChannelTwo;
+                                response.topicData.subscription = Subscriptions.ChannelTwo;
 
                             if (playerCount == 3)
-                                response.subscription = Subscriptions.ChannelThree;
+                                response.topicData.subscription = Subscriptions.ChannelThree;
 
                             if (playerCount == 4)
-                                response.subscription = Subscriptions.ChannelFour;
+                                response.topicData.subscription = Subscriptions.ChannelFour;
 
                             // convert the response model to a JsonString
                             string line = JsonConvert.SerializeObject(response);
 
                             // send response data
-                            SendMessage(line, MessageType.Response);
+                            SendQueueMessage(line, MessageType.Response);
                         }
 
                     }
@@ -160,11 +161,23 @@ namespace WPF_ServiceBus.Logics
                         // update player data
                         self = player;
 
-                        // change to the correct subscription
-                        ChangeSubscription(response.subscription);
+                        // store service bus topic data in program
+                        program.StoreTopicData(response.topicData);
                     }
                 }
             }
+        }
+
+        public void HandleTopicMessage(string message)
+        {
+            // decode message
+            Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
+
+            if (transfer.type == MessageType.Action)
+            {
+                
+            }
+
         }
     }
 }
