@@ -19,6 +19,12 @@ namespace ServiceBus.Handlers
             RegisterOnMessageHandlerAndReceiveMessages(onMessageRecivedCallBack);
         }
 
+        public ServiceBusQueueHandler(string connectionString, string queueName)
+        {
+            // create connection link
+            _queueClient = new QueueClient(connectionString, queueName);
+        }
+
         public async Task SendMessagesAsync(string message, string sessionCode)
         {
             try

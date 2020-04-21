@@ -45,16 +45,72 @@ namespace WPF_ServiceBus.Logics
             // create new instance of program
             program = new Program();
 
+            QueueData writerData;
+            QueueData listnerData;
+
+            if (self.type == PlayerType.Host)
+            {
+                // set connection data
+                writerData = CreateHostQueueConnection(sessionCode, false);
+                listnerData = CreateHostQueueConnection(sessionCode, true);
+            }
+            else
+            {
+                // set connection data
+                writerData = CreateGuestQueueConnection(sessionCode, false);
+                listnerData = CreateGuestQueueConnection(sessionCode, true);
+            }
+
+
+
+            // pass over connection data
+            program.SetQueueData(writerData, listnerData);
+        }
+
+        private QueueData CreateHostQueueConnection(string sessionCode, bool reader)
+        {
             // set connection data
             QueueData data = new QueueData();
 
-            // topic connection string
-            data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=queueAccess;SharedAccessKey=N6QTxPjNMav7V8IhHOm8mN9c0XAjK9Ey5V95vcqMDis=;";
-            data.queueName = "join";
-            data.sessionCode = sessionCode;
+            if (reader)
+            {
+                // topic connection string
+                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=listner;SharedAccessKey=OcHkmq27xlgQdRB1gMFJhbLNE7dmAYmzggr2ml/X+Go=;";
+                data.queueName = "join";
+                data.sessionCode = sessionCode;
+            }
+            else
+            {
+                // topic connection string
+                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=writer;SharedAccessKey=W/qSGSLJsyHbE7b1Hj3zW6fid3kB/S0izjixscZp5Yw=;";
+                data.queueName = "response";
+                data.sessionCode = sessionCode;
+            }
 
-            // pass over connection data
-            program.SetQueueData(data);
+            return data;
+        }
+
+        private QueueData CreateGuestQueueConnection(string sessionCode, bool reader)
+        {
+            // set connection data
+            QueueData data = new QueueData();
+
+            if (reader)
+            {
+                // topic connection string
+                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=listner;SharedAccessKey=GzBNcv3kFZ0p9kjodCafGOTVUKObvIMGX1msgtdwE4A=";
+                data.queueName = "response";
+                data.sessionCode = sessionCode;
+            }
+            else
+            {
+                // topic connection string
+                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=writer;SharedAccessKey=Qo3wBhYffRY/CSrpu4vcH7n+EtbVbRNZjC+HFEewb9c=;";
+                data.queueName = "join";
+                data.sessionCode = sessionCode;
+            }
+
+            return data;
         }
 
         public ServiceBusHandler(Program existingProgram)
@@ -112,7 +168,6 @@ namespace WPF_ServiceBus.Logics
 
                             // create response model
                             SessionResponse response = new SessionResponse();
-                            response.playerList = players;
                             response.Player = source;
                             response.accepted = true;
                             response.topicData.TopicConnectionString = program.TopicData.TopicConnectionString; // get newly created topic connection string
@@ -136,6 +191,16 @@ namespace WPF_ServiceBus.Logics
 
                             // send response data
                             SendQueueMessage(line, MessageType.Response);
+
+                            // create new player message, so everyone in the game can update their player list
+                            NewPlayerMessage newPlayerMessage = new NewPlayerMessage();
+                            newPlayerMessage.playerList = players;
+
+                            // convert the NewPlayerMessage model to a JsonString
+                            line = JsonConvert.SerializeObject(newPlayerMessage);
+
+                            // send the new player message
+                            SendTopicMessage(line, MessageType.NewPlayer);
                         }
 
                     }
@@ -150,9 +215,6 @@ namespace WPF_ServiceBus.Logics
                     
                     // get the player from the response model
                     Player player = response.Player;
-
-                    // update the player collection with the newly joinend players
-                    PlayerCollection = new ObservableCollection<Player>(response.playerList);
 
                     // check if the response is meant for me
                     if (player.userId == self.userId && player.name == self.name && player.type == self.type)
@@ -173,9 +235,13 @@ namespace WPF_ServiceBus.Logics
             // decode message
             Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
 
-            if (transfer.type == MessageType.Action)
+            if (transfer.type == MessageType.NewPlayer)
             {
-                
+                // decode message to SessionResponseModel
+                NewPlayerMessage response = JsonConvert.DeserializeObject<NewPlayerMessage>(transfer.message);
+
+                // update the player collection with the newly joinend players
+                PlayerCollection = new ObservableCollection<Player>(response.playerList);
             }
 
         }

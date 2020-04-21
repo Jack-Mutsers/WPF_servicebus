@@ -14,7 +14,8 @@ namespace ServiceBus
 {
     public class Program
     {
-        private IServiceBusQueueHandler _QueueHandler;
+        private IServiceBusQueueHandler _ListnerQueueHandler;
+        private IServiceBusQueueHandler _WriterQueueHandler;
         private IServiceBusTopicHandler _TopicHandler;
         public QueueData QueueData { get; private set; }
         public TopicData TopicData { get; private set; }
@@ -57,16 +58,14 @@ namespace ServiceBus
             _TopicHandler = new ServiceBusTopicHandler(TopicData.TopicConnectionString, TopicData.topic, subscriptionName, ProcessTopicMessagesAsync);
         }
 
-        public void SetQueueData(QueueData data)
+        public void SetQueueData(QueueData writerData, QueueData listnerData)
         {
             // set the session data
-            QueueData = data;
-
-            // make sure handler is clear before setting a new one
-            _QueueHandler = null;
+            QueueData = writerData;
 
             // assign handler
-            _QueueHandler = new ServiceBusQueueHandler(data.QueueConnectionString, data.queueName, ProcessQueueSessionAsync);
+            _WriterQueueHandler = new ServiceBusQueueHandler(writerData.QueueConnectionString, writerData.queueName);
+            _ListnerQueueHandler = new ServiceBusQueueHandler(listnerData.QueueConnectionString, listnerData.queueName, ProcessQueueSessionAsync);
         }
 
         public async void SendQueueMessage(string message, MessageType type)
@@ -80,7 +79,7 @@ namespace ServiceBus
             string line = JsonConvert.SerializeObject(transfer);
 
             // sent the message string to the service bus
-            await _QueueHandler.SendMessagesAsync(line, QueueData.sessionCode);
+            await _WriterQueueHandler.SendMessagesAsync(line, QueueData.sessionCode);
         }
 
         public async void SendTopicMessage(string message, MessageType type)
@@ -125,7 +124,7 @@ namespace ServiceBus
             string val = $"{Encoding.UTF8.GetString(message.Body)}";
 
             // check if the message is json encoded
-            if (val.StartsWith("{") && val.EndsWith("}") && _QueueHandler != null)
+            if (val.StartsWith("{") && val.EndsWith("}"))
             {
 
                 // decode the json

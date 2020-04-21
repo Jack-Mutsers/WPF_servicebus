@@ -22,6 +22,7 @@ namespace Database.Entities.Enums
     {
         JoinRequest, // only valid for the host
         Response, // only valid for guests
+        NewPlayer,
         Log,
         Action,
         ReadyUp

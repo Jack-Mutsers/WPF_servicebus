@@ -68,12 +68,17 @@ namespace WPF_ServiceBus
 
         public void OnMessageReceived(string message)
         {
-            _handler.HandleQueueMessage(message);
-
             Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
+
             if (transfer.type == MessageType.Response)
             {
+                _handler.HandleQueueMessage(message);
                 lblSession.Content = _handler.SessionCode;
+            }
+
+            if (transfer.type == MessageType.NewPlayer)
+            {
+                _handler.HandleTopicMessage(message);
                 lv.ItemsSource = _handler.PlayerCollection;
             }
         }
