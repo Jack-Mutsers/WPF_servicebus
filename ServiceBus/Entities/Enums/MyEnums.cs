@@ -35,6 +35,7 @@ namespace ServiceBus.Entities.Enums
         ChannelTwo,
         ChannelThree,
         ChannelFour,
-        Join
+        joinRequests,
+        Responses
     }
 }
