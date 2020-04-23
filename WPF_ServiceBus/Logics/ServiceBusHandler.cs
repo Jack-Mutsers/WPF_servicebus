@@ -18,7 +18,7 @@ namespace WPF_ServiceBus.Logics
 
         public string SessionCode
         {
-            get { return program.TopicDataJoin.sessionCode; }
+            get { return program.QueueData.sessionCode; }
         }
 
         private ObservableCollection<Player> playerCollection = new ObservableCollection<Player>();
@@ -48,75 +48,66 @@ namespace WPF_ServiceBus.Logics
 
         public void CreateQueueConnection(string sessionCode, PlayerType playerType)
         {
-            TopicData writerData = new TopicData() {
-                sessionCode = sessionCode,
-                subscription = Subscriptions.joinRequests,
-                topic = "hoster",
-                TopicConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=accessmanager;SharedAccessKey=YjYhzEAJ4K/eqHu2iTa1Hri+2KNLddTEw6HF4cCJTw0=;"
-            };
-            TopicData listnerData = new TopicData();
+            QueueData writerData;
+            QueueData listnerData;
 
-            //if (playerType == PlayerType.Host)
-            //{
-            //    // set connection data
-            //    writerData = CreateHostQueueConnection(sessionCode, false);
-            //    listnerData = CreateHostQueueConnection(sessionCode, true);
-            //}
-            //else
-            //{
-            //    // set connection data
-            //    writerData = CreateGuestQueueConnection(sessionCode, false);
-            //    listnerData = CreateGuestQueueConnection(sessionCode, true);
-            //}
+            if (playerType == PlayerType.Host)
+            {
+                // set connection data
+                writerData = CreateHostQueueConnection(sessionCode, false);
+                listnerData = CreateHostQueueConnection(sessionCode, true);
+            }
+            else
+            {
+                // set connection data
+                writerData = CreateGuestQueueConnection(sessionCode, false);
+                listnerData = CreateGuestQueueConnection(sessionCode, true);
+            }
 
             // pass over connection data
-            program.SetTopicJoinData(writerData, listnerData);
+            program.SetQueueData(writerData, listnerData);
         }
 
-        private TopicData CreateHostQueueConnection(string sessionCode, bool reader)
+        private QueueData CreateHostQueueConnection(string sessionCode, bool reader)
         {
             // set connection data
-            TopicData data = new TopicData();
+            QueueData data = new QueueData();
 
             if (reader)
             {
                 // topic connection string
-                data.TopicConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=listner;SharedAccessKey=B1btS6Rn2QFXNtCBGJvljH0WTrsyoI7Uhu+4u9nHheI=;";
-                data.topic = "hoster";
-                data.subscription = Subscriptions.joinRequests;
+                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=listner;SharedAccessKey=OcHkmq27xlgQdRB1gMFJhbLNE7dmAYmzggr2ml/X+Go=;";
+                data.queueName = "join";
                 data.sessionCode = sessionCode;
             }
             else
             {
                 // topic connection string
-                data.TopicConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=writer;SharedAccessKey=zimE+tu5sbTK6I6FFiuuYLRoBD9pa8pa/ETX8IoCYbo=;";
-                data.topic = "joiner";
-                data.subscription = Subscriptions.Responses;
+                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=writer;SharedAccessKey=W/qSGSLJsyHbE7b1Hj3zW6fid3kB/S0izjixscZp5Yw=;";
+                data.queueName = "response";
                 data.sessionCode = sessionCode;
             }
 
             return data;
         }
 
-        private TopicData CreateGuestQueueConnection(string sessionCode, bool reader)
+        private QueueData CreateGuestQueueConnection(string sessionCode, bool reader)
         {
             // set connection data
-            TopicData data = new TopicData();
+            QueueData data = new QueueData();
 
             if (reader)
             {
                 // topic connection string
-                data.TopicConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=listner;SharedAccessKey=nfdXAzJ312UkFQC8D5lov2C1IPxRAREIfQ2Td4ZWllg=;";
-                data.topic = "joiner";
-                data.subscription = Subscriptions.Responses;
+                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=listner;SharedAccessKey=GzBNcv3kFZ0p9kjodCafGOTVUKObvIMGX1msgtdwE4A=";
+                data.queueName = "response";
                 data.sessionCode = sessionCode;
             }
             else
             {
                 // topic connection string
-                data.TopicConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=writer;SharedAccessKey=Th0blW5jeM60oi8gRw+kxl95aetEiBhB+V6H/oVJcgE=;";
-                data.topic = "hoster";
-                data.subscription = Subscriptions.joinRequests;
+                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=writer;SharedAccessKey=Qo3wBhYffRY/CSrpu4vcH7n+EtbVbRNZjC+HFEewb9c=;";
+                data.queueName = "join";
                 data.sessionCode = sessionCode;
             }
 

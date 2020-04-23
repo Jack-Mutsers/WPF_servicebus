@@ -14,10 +14,10 @@ namespace ServiceBus
 {
     public class Program
     {
-        private IServiceBusTopicSessionHandler _ListnerTopicHandler;
-        private IServiceBusTopicSessionHandler _WriterTopicHandler;
+        private IServiceBusQueueHandler _ListnerQueueHandler;
+        private IServiceBusQueueHandler _WriterQueueHandler;
         private IServiceBusTopicHandler _TopicHandler;
-        public TopicData TopicDataJoin { get; private set; }
+        public QueueData QueueData { get; private set; }
         public TopicData TopicData { get; private set; }
         public Player User { get; set; }
 
@@ -62,22 +62,18 @@ namespace ServiceBus
         public void CreateNewTopic()
         {
             TopicCreator creator = new TopicCreator();
-            TopicData = creator.CreateNewTopic(TopicDataJoin.sessionCode);
+            TopicData = creator.CreateNewTopic(QueueData.sessionCode);
             SetTopicData();
         }
 
-        public void SetTopicJoinData(TopicData writerData, TopicData listnerData)
+        public void SetQueueData(QueueData writerData, QueueData listnerData)
         {
             // set the session data
-            TopicDataJoin = writerData;
-
-            // convert subscription emum to string
-            //string listnerSubscription = Enum.GetName(typeof(Subscriptions), listnerData.subscription);
-            string writerSubscription = Enum.GetName(typeof(Subscriptions), writerData.subscription);
+            QueueData = writerData;
 
             // assign handler
-            //_ListnerTopicHandler = new ServiceBusTopicSessionsHandler(listnerData.TopicConnectionString, listnerData.topic, listnerSubscription, ProcessTopicSessionAsync);
-            _WriterTopicHandler = new ServiceBusTopicSessionsHandler(writerData.TopicConnectionString, writerData.topic, writerSubscription, ProcessTopicSessionAsync);
+            _ListnerQueueHandler = new ServiceBusQueueHandler(listnerData.QueueConnectionString, listnerData.queueName, ProcessQueueSessionAsync);
+            _WriterQueueHandler = new ServiceBusQueueHandler(writerData.QueueConnectionString, writerData.queueName);
         }
 
         public async void SendQueueMessage(string message, MessageType type)
@@ -91,7 +87,7 @@ namespace ServiceBus
             string line = JsonConvert.SerializeObject(transfer);
 
             // sent the message string to the service bus
-            await _WriterTopicHandler.SendMessagesAsync(line, TopicDataJoin.sessionCode);
+            await _WriterQueueHandler.SendMessagesAsync(line, QueueData.sessionCode);
         }
 
         public async void SendTopicMessage(string message, MessageType type)
@@ -108,11 +104,12 @@ namespace ServiceBus
             await _TopicHandler.SendMessagesAsync(line);
         }
 
-        public async Task ProcessTopicSessionAsync(IMessageSession messageSession, Message message, CancellationToken token)
+        public async Task ProcessQueueSessionAsync(IMessageSession messageSession, Message message, CancellationToken token)
         {
             // check if the message is for me by compairing the session code
-            if (TopicDataJoin.sessionCode != messageSession.SessionId)
+            if (QueueData.sessionCode != messageSession.SessionId)
             {
+                await Task.Yield();
                 return;
             }
 
@@ -129,21 +126,15 @@ namespace ServiceBus
                 // check if the transfer type of the response type is and check if the application is still on the join subscription
                 if (transfer.type == MessageType.Response)
                 {
-                    if (User.type != PlayerType.Host)
-                    {
-                        // I am still waiting for my session response
-                        // decode the response
-                        var responseModel = JsonConvert.DeserializeObject<SessionResponse>(transfer.message);
+                    // I am still waiting for my session response
+                    // decode the response
+                    var responseModel = JsonConvert.DeserializeObject<SessionResponse>(transfer.message);
 
-                        // check if the response is meant for me
-                        if (responseModel.Player.userId != User.userId)
-                        {
-                            // the response was not for me
-                            return;
-                        }
-                    }
-                    else
+                    // check if the response is meant for me
+                    if (responseModel.Player.userId != User.userId)
                     {
+                        // the response was not for me
+                        await Task.Yield();
                         return;
                     }
                 }

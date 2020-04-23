@@ -10,6 +10,5 @@ namespace ServiceBus.Data
         public string TopicConnectionString { get; set; }
         public string topic { get; set; }
         public Subscriptions subscription { get; set; }
-        public string sessionCode { get; set; }
     }
 }
