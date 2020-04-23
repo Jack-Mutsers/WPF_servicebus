@@ -33,22 +33,32 @@
         <Label Content="Input log" HorizontalAlignment="Left" Margin="306,12,0,0" VerticalAlignment="Top"/>
         <ListBox x:Name="lbLog" HorizontalAlignment="Left" Height="149" Margin="306,38,0,0" VerticalAlignment="Top" Width="476"/>
 
-        <Label Content="Respose values" HorizontalAlignment="Left" Margin="306,219,0,0" VerticalAlignment="Top"/>
+        <Label Content="Respose values" HorizontalAlignment="Left" Margin="318,210,0,0" VerticalAlignment="Top"/>
         <Grid x:Name="responseGrid" >
-            <Label Content="naam:" HorizontalAlignment="Left" Margin="306,250,0,0" VerticalAlignment="Top"/>
-            <Label Content="{Binding Path=naam, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="387,250,0,0" VerticalAlignment="Top"/>
+            <StackPanel Orientation="Vertical" Width="250" Margin="314,242,228,68">
+                <StackPanel Visibility="Collapsed" Height="25" Orientation="Horizontal">
+                    <Label Content="naam:" />
+                    <Label Content="{Binding Path=naam, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                </StackPanel>
+                <StackPanel Height="25" Orientation="Horizontal">
+                    <Label Content="sessionCode:"/>
+                    <Label Content="{Binding Path=sessionCode, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                </StackPanel>
+                <StackPanel Height="25" Orientation="Horizontal">
+                    <Label Content="coördinates:" />
+                    <Label Content="col:" />
+                    <Label Content="{Binding Path=coordinates.col, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                    <Label Content="row:" />
+                    <Label Content="{Binding Path=coordinates.row, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                </StackPanel>
+                <StackPanel Height="25" Orientation="Horizontal">
+                    <Label Content="action:" />
+                    <Label Content="{Binding Path=action, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                </StackPanel>
+            </StackPanel>
 
-            <Label Content="sessionCode:" HorizontalAlignment="Left" Margin="306,276,0,0" VerticalAlignment="Top"/>
-            <Label Content="{Binding Path=sessionCode, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="387,276,0,0" VerticalAlignment="Top"/>
 
-            <Label Content="coördinates:" HorizontalAlignment="Left" Margin="306,306,0,0" VerticalAlignment="Top"/>
-            <Label Content="col:" HorizontalAlignment="Left" Margin="387,306,0,0" VerticalAlignment="Top"/>
-            <Label Content="{Binding Path=coordinates.col, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="415,306,-29,0" VerticalAlignment="Top"/>
-            <Label Content="row:" HorizontalAlignment="Left" Margin="446,306,0,0" VerticalAlignment="Top"/>
-            <Label Content="{Binding Path=coordinates.row, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="478,306,0,0" VerticalAlignment="Top"/>
 
-            <Label Content="action:" HorizontalAlignment="Left" Margin="306,331,0,0" VerticalAlignment="Top"/>
-            <Label Content="{Binding Path=action, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" HorizontalAlignment="Left" Margin="387,331,0,0" VerticalAlignment="Top"/>
             <Button x:Name="btnBack" Content="back to home" HorizontalAlignment="Left" Margin="10,389,0,0" VerticalAlignment="Top" Width="89" Click="btnBack_Click"/>
         </Grid>
     </Grid>

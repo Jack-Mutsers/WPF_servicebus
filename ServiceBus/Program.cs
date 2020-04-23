@@ -7,7 +7,7 @@ using ServiceBus.Entities.models;
 using ServiceBus.Data;
 using System.Collections.Generic;
 using System;
-using Database.Entities.Enums;
+using ServiceBus.Entities.Enums;
 using ServiceBus.Handlers;
 
 namespace ServiceBus
@@ -44,6 +44,7 @@ namespace ServiceBus
         {
             // set the session data
             TopicData = data;
+            SetTopicData();
         }
 
         public void SetTopicData()
@@ -58,14 +59,21 @@ namespace ServiceBus
             _TopicHandler = new ServiceBusTopicHandler(TopicData.TopicConnectionString, TopicData.topic, subscriptionName, ProcessTopicMessagesAsync);
         }
 
+        public void CreateNewTopic()
+        {
+            TopicCreator creator = new TopicCreator();
+            TopicData = creator.CreateNewTopic(QueueData.sessionCode);
+            SetTopicData();
+        }
+
         public void SetQueueData(QueueData writerData, QueueData listnerData)
         {
             // set the session data
             QueueData = writerData;
 
             // assign handler
-            _WriterQueueHandler = new ServiceBusQueueHandler(writerData.QueueConnectionString, writerData.queueName);
             _ListnerQueueHandler = new ServiceBusQueueHandler(listnerData.QueueConnectionString, listnerData.queueName, ProcessQueueSessionAsync);
+            _WriterQueueHandler = new ServiceBusQueueHandler(writerData.QueueConnectionString, writerData.queueName);
         }
 
         public async void SendQueueMessage(string message, MessageType type)
@@ -96,27 +104,12 @@ namespace ServiceBus
             await _TopicHandler.SendMessagesAsync(line);
         }
 
-        public async Task ProcessTopicMessagesAsync(Message message, CancellationToken token)
-        {
-            // Process the message.
-            string val = $"{Encoding.UTF8.GetString(message.Body)}";
-
-            // check if the message is json encoded
-            if (val.StartsWith("{") && val.EndsWith("}") && _TopicHandler != null){
-
-                // close recieved message
-                await _TopicHandler.CompleteMessageAsync(message.SystemProperties.LockToken);
-
-                // send message to the setResponse method
-                _currentSynchronizationContext.Send(x => setResponse(val), null);
-            }
-        }
-
         public async Task ProcessQueueSessionAsync(IMessageSession messageSession, Message message, CancellationToken token)
         {
             // check if the message is for me by compairing the session code
             if (QueueData.sessionCode != messageSession.SessionId)
             {
+                await Task.Yield();
                 return;
             }
 
@@ -141,6 +134,7 @@ namespace ServiceBus
                     if (responseModel.Player.userId != User.userId)
                     {
                         // the response was not for me
+                        await Task.Yield();
                         return;
                     }
                 }
@@ -152,5 +146,22 @@ namespace ServiceBus
             // complete the message so it is not recieved by anyone else
             await Task.CompletedTask;
         }
+
+        public async Task ProcessTopicMessagesAsync(Message message, CancellationToken token)
+        {
+            // Process the message.
+            string val = $"{Encoding.UTF8.GetString(message.Body)}";
+
+            // check if the message is json encoded
+            if (val.StartsWith("{") && val.EndsWith("}") && _TopicHandler != null){
+
+                // close recieved message
+                await _TopicHandler.CompleteMessageAsync(message.SystemProperties.LockToken);
+
+                // send message to the setResponse method
+                _currentSynchronizationContext.Send(x => setResponse(val), null);
+            }
+        }
+
     }
 }

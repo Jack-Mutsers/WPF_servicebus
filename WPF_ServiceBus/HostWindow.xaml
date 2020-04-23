@@ -12,7 +12,7 @@
         <Button Content="generade session code" HorizontalAlignment="Left" Margin="46,89,0,0" VerticalAlignment="Top" Width="139" Click="Start_Host"/>
         <Label Content="session code: " HorizontalAlignment="Left" Margin="46,160,0,0" VerticalAlignment="Top"/>
         <Label x:Name="lblSession" Content="{Binding sessionCode}" HorizontalAlignment="Left" Margin="134,160,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="btnBack" Content="back to home" HorizontalAlignment="Left" Margin="10,389,0,0" VerticalAlignment="Top" Width="89" Click="btnBack_Click"/>
+        <Button x:Name="btnBack" Content="back to home" HorizontalAlignment="Left" Margin="40,366,0,0" VerticalAlignment="Top" Width="89" Click="btnBack_Click"/>
         <ListView Name="lv" HorizontalAlignment="Left" Height="143" Margin="458,27,0,0" VerticalAlignment="Top" Width="300">
             <ListView.ItemTemplate>
                 <DataTemplate>
@@ -25,6 +25,7 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        <Button Content="play" HorizontalAlignment="Left" Margin="156,366,0,0" VerticalAlignment="Top" Width="88" Click="btnPlay_Click"/>
 
 
     </Grid>

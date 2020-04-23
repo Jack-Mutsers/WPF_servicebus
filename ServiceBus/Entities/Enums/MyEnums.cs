@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Database.Entities.Enums
+namespace ServiceBus.Entities.Enums
 {
     public enum PlayerAction
     {

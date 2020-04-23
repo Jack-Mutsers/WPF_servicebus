@@ -1,4 +1,4 @@
-﻿using Database.Entities.Enums;
+﻿using ServiceBus.Entities.Enums;
 using Newtonsoft.Json;
 using ServiceBus.Entities.models;
 using System;
@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using WPF_ServiceBus.Logics;
+using ServiceBus;
 
 namespace WPF_ServiceBus
 {
@@ -23,7 +24,7 @@ namespace WPF_ServiceBus
     /// </summary>
     public partial class PlayingField : Window
     {
-        ServiceBusHandler initialiser = new ServiceBusHandler("AB12R");
+        ServiceBusHandler _handler;
         Coordinates coordinates { get; set; }
 
         void addLogItem(string text)
@@ -34,11 +35,53 @@ namespace WPF_ServiceBus
             lbLog.ScrollIntoView(lbLog.SelectedItem);
         }
 
+        public PlayingField(Program program)
+        {
+            InitializeComponent();
+            _handler = new ServiceBusHandler(program);
+        }
+
         public PlayingField()
         {
             InitializeComponent();
+            CreateDummyConnection();
+        }
 
-            initialiser.program.MessageReceived += OnMessageReceived;
+        public void CreateDummyConnection()
+        {
+            // check if handler is empty, if so create an instance of it
+            if (_handler == null)
+            {
+                // create an instance of the servicebus handler
+                _handler = new ServiceBusHandler();
+
+                // initialise SessionCodeGenerator
+                SessionCodeGenerator generator = new SessionCodeGenerator();
+
+                // Generade sessionCode
+                string sessionCode = generator.GenerateSessionCode();
+
+                _handler.CreateQueueConnection(sessionCode, PlayerType.Host);
+
+                _handler.program.MessageReceived += OnMessageReceived;
+            }
+
+            // check if user data is unset
+            if (_handler.self == null)
+            {
+                Player player = new Player()
+                {
+                    name = "",
+                    orderNumber = 1,
+                    ready = true,
+                    type = PlayerType.Host
+                };
+
+                // store player data in handler
+                _handler.SetHostData(player);
+
+                _handler.program.MessageReceived += OnMessageReceived;
+            }
         }
 
         private void shoot_Click(object sender, RoutedEventArgs e)
@@ -52,7 +95,7 @@ namespace WPF_ServiceBus
 
                 string message = JsonConvert.SerializeObject(actionModel);
 
-                initialiser.SendTopicMessage(message, MessageType.Action);
+                _handler.SendTopicMessage(message, MessageType.Action);
 
                 addLogItem("shooting data send");
             }
@@ -71,7 +114,7 @@ namespace WPF_ServiceBus
 
             string message = JsonConvert.SerializeObject(actionModel);
 
-            initialiser.SendTopicMessage(message, MessageType.Action);
+            _handler.SendTopicMessage(message, MessageType.Action);
             addLogItem("you chose to surender");
         }
 
@@ -114,7 +157,7 @@ namespace WPF_ServiceBus
 
             if (transfer.type == MessageType.Action)
             {
-                Action source = JsonConvert.DeserializeObject<Action>(transfer.message);
+                GameAction source = JsonConvert.DeserializeObject<GameAction>(transfer.message);
                 responseGrid.DataContext = source;
             }
 

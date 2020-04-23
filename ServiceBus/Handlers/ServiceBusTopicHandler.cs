@@ -40,13 +40,17 @@ namespace ServiceBus.Handlers
 
         public async Task CompleteMessageAsync(string lockToken)
         {
-            // Complete the message so that it is not received again.
-            // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
-            await subscriptionClient.CompleteAsync(lockToken);
+            try
+            {
+                // Complete the message so that it is not received again.
+                // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
+                await subscriptionClient.CompleteAsync(lockToken);
 
-            // Note: Use the cancellationToken passed as necessary to determine if the subscriptionClient has already been closed.
-            // If subscriptionClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.
-            // to avoid unnecessary exceptions.
+                // Note: Use the cancellationToken passed as necessary to determine if the subscriptionClient has already been closed.
+                // If subscriptionClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.
+                // to avoid unnecessary exceptions.
+            }
+            catch(Exception ex){ }
         }
 
         void RegisterOnMessageHandlerAndReceiveMessages(Func<Message,CancellationToken,Task> onMessageRecivedCallBack)
@@ -55,7 +59,7 @@ namespace ServiceBus.Handlers
             {
                 // Maximum number of concurrent calls to the callback ProcessMessagesAsync(), set to 1 for simplicity.
                 // Set it according to how many messages the application wants to process in parallel.
-                MaxConcurrentCalls = 1,
+                MaxConcurrentCalls = 2,
 
                 // Indicates whether the message pump should automatically complete the messages after returning from user callback.
                 // False below indicates the complete operation is handled by the user callback as in ProcessMessagesAsync().

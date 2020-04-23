@@ -1,4 +1,4 @@
-﻿using Database.Entities.Enums;
+﻿using ServiceBus.Entities.Enums;
 using Newtonsoft.Json;
 using ServiceBus;
 using ServiceBus.Entities.models;
@@ -40,15 +40,18 @@ namespace WPF_ServiceBus.Logics
             set { program.User = value; }
         }
 
-        public ServiceBusHandler(string sessionCode)
+        public ServiceBusHandler()
         {
             // create new instance of program
             program = new Program();
+        }
 
+        public void CreateQueueConnection(string sessionCode, PlayerType playerType)
+        {
             QueueData writerData;
             QueueData listnerData;
 
-            if (self.type == PlayerType.Host)
+            if (playerType == PlayerType.Host)
             {
                 // set connection data
                 writerData = CreateHostQueueConnection(sessionCode, false);
@@ -60,8 +63,6 @@ namespace WPF_ServiceBus.Logics
                 writerData = CreateGuestQueueConnection(sessionCode, false);
                 listnerData = CreateGuestQueueConnection(sessionCode, true);
             }
-
-
 
             // pass over connection data
             program.SetQueueData(writerData, listnerData);
@@ -170,8 +171,11 @@ namespace WPF_ServiceBus.Logics
                             SessionResponse response = new SessionResponse();
                             response.Player = source;
                             response.accepted = true;
-                            response.topicData.TopicConnectionString = program.TopicData.TopicConnectionString; // get newly created topic connection string
-                            response.topicData.topic = program.TopicData.topic; // get newly created topic name
+                            response.topicData = new TopicData()
+                            {
+                                TopicConnectionString = program.TopicData.TopicConnectionString, // get newly created topic connection string
+                                topic = program.TopicData.topic // get newly created topic name
+                            };
 
                             // check what channel will be assigned to the new player
                             if (playerCount == 1)
@@ -244,6 +248,13 @@ namespace WPF_ServiceBus.Logics
                 PlayerCollection = new ObservableCollection<Player>(response.playerList);
             }
 
+        }
+
+        public void SetHostData(Player player)
+        {
+            playerCollection.Add(player);
+            self = player;
+            program.CreateNewTopic();
         }
     }
 }

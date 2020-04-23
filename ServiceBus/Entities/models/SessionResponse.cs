@@ -1,4 +1,4 @@
-﻿using Database.Entities.Enums;
+﻿using ServiceBus.Entities.Enums;
 using ServiceBus.Data;
 using System;
 using System.Collections.Generic;

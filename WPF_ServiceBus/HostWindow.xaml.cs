@@ -1,4 +1,4 @@
-﻿using Database.Entities.Enums;
+﻿using ServiceBus.Entities.Enums;
 using Newtonsoft.Json;
 using ServiceBus.Entities.models;
 using ServiceBus.Data;
@@ -37,14 +37,16 @@ namespace WPF_ServiceBus
             // check if handler is empty, if so create an instance of it
             if (_handler == null)
             {
+                // create an instance of the servicebus handler
+                _handler = new ServiceBusHandler();
+
                 // initialise SessionCodeGenerator
                 SessionCodeGenerator generator = new SessionCodeGenerator();
 
                 // Generade sessionCode
                 string sessionCode = generator.GenerateSessionCode();
 
-                // create an instance of the servicebus handler
-                _handler = new ServiceBusHandler(sessionCode);
+                _handler.CreateQueueConnection(sessionCode, PlayerType.Host);
 
                 _handler.program.MessageReceived += OnMessageReceived;
             }
@@ -52,21 +54,19 @@ namespace WPF_ServiceBus
             // check if user data is unset
             if (_handler.self == null)
             {
-
                 // Set player data
                 Player player = new Player();
                 player.name = tbName.Text;
                 player.type = PlayerType.Host;
+                player.orderNumber = 1;
 
                 // store player data in handler
-                _handler.self = player;
+                _handler.SetHostData(player);
+                lblSession.Content = _handler.SessionCode;
+                lv.ItemsSource = _handler.PlayerCollection;
 
-                // Serialize player data
-                string message = JsonConvert.SerializeObject(player);
-
-                // sent player data in a join request
-                _handler.SendQueueMessage(message, MessageType.JoinRequest);
             }
+
         }
 
         public void OnMessageReceived(string message)
@@ -90,6 +90,13 @@ namespace WPF_ServiceBus
         {
             MainWindow main = new MainWindow();
             main.Show();
+            this.Close();
+        }
+
+        private void btnPlay_Click(object sender, RoutedEventArgs e)
+        {
+            PlayingField playingField = new PlayingField(_handler.program);
+            playingField.Show();
             this.Close();
         }
     }

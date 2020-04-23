@@ -1,4 +1,4 @@
-﻿using Database.Entities.Enums;
+﻿using ServiceBus.Entities.Enums;
 using Newtonsoft.Json;
 using ServiceBus.Entities.models;
 using System;
@@ -44,10 +44,15 @@ namespace WPF_ServiceBus
             // check if handler is empty, if so create an instance of it
             if (_handler == null)
             {
-                string sessionCode = tbCode.Text;
 
                 // create an instance of the servicebus handler
-                _handler = new ServiceBusHandler(sessionCode);
+                _handler = new ServiceBusHandler();
+
+                // get sessin code
+                string sessionCode = tbCode.Text;
+
+                // create Queue connection
+                _handler.CreateQueueConnection(sessionCode, PlayerType.Guest);
 
                 _handler.program.MessageReceived += OnMessageReceived;
             }
