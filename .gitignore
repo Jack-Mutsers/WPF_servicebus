@@ -1,16 +1,6 @@
 
-.vs/
+.vs/*
 
-WPF_ServiceBus/obj/
+*/obj/*
 
-WPF_ServiceBus/bin/
-
-*.v2
-
-Database/bin/Debug/netstandard2.0/
-
-Database/obj/
-
-ServiceBus/bin/Debug/netstandard2.0/
-
-ServiceBus/obj/Debug/netstandard2.0/
+*/bin/*
