@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using WPF_ServiceBus.Logics;
+using ServiceBus.Resources;
 
 namespace WPF_ServiceBus
 {
@@ -29,7 +30,6 @@ namespace WPF_ServiceBus
         public HostWindow()
         {
             InitializeComponent();
-
         }
 
         private void Start_Host(object sender, RoutedEventArgs e)
@@ -37,8 +37,14 @@ namespace WPF_ServiceBus
             // check if handler is empty, if so create an instance of it
             if (_handler == null)
             {
+                // Set player data
+                Player player = new Player();
+                player.name = tbName.Text;
+                player.type = PlayerType.Host;
+                player.orderNumber = 1;
+
                 // create an instance of the servicebus handler
-                _handler = new ServiceBusHandler();
+                _handler = new ServiceBusHandler(player, true);
 
                 // initialise SessionCodeGenerator
                 SessionCodeGenerator generator = new SessionCodeGenerator();
@@ -46,45 +52,42 @@ namespace WPF_ServiceBus
                 // Generade sessionCode
                 string sessionCode = generator.GenerateSessionCode();
 
-                _handler.CreateQueueConnection(sessionCode, PlayerType.Host);
+                StaticResources.sessionCode = sessionCode;
 
-                _handler.program.MessageReceived += OnMessageReceived;
+                _handler.program.CreateQueueConnection(PlayerType.Host);
+
+                _handler.program.QueueListner.MessageReceived += OnQueueMessageReceived;
+                _handler.program.topic.MessageReceived += OnTopicMessageReceived;
             }
 
-            // check if user data is unset
-            if (_handler.self == null)
-            {
-                // Set player data
-                Player player = new Player();
-                player.name = tbName.Text;
-                player.type = PlayerType.Host;
-                player.orderNumber = 1;
-
-                // store player data in handler
-                _handler.SetHostData(player);
-                lblSession.Content = _handler.SessionCode;
-                lv.ItemsSource = _handler.PlayerCollection;
-
-            }
+            lblSession.Content = StaticResources.sessionCode;
+            lv.ItemsSource = StaticResources.PlayerList;
 
         }
 
-        public void OnMessageReceived(string message)
+        public void OnQueueMessageReceived(string message)
         {
             Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
 
             if (transfer.type == MessageType.JoinRequest)
             {
                 _handler.HandleQueueMessage(message);
+                lblSession.Content = StaticResources.sessionCode;
             }
+        }
+
+        public void OnTopicMessageReceived(string message)
+        {
+            Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
 
             if (transfer.type == MessageType.NewPlayer)
             {
                 _handler.HandleTopicMessage(message);
-                lblSession.Content = _handler.SessionCode;
-                lv.ItemsSource = _handler.PlayerCollection;
+                lblSession.Content = StaticResources.sessionCode;
+                lv.ItemsSource = StaticResources.PlayerList;
             }
         }
+
 
         private void btnBack_Click(object sender, RoutedEventArgs e)
         {
@@ -95,7 +98,7 @@ namespace WPF_ServiceBus
 
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
-            PlayingField playingField = new PlayingField(_handler.program);
+            PlayingField playingField = new PlayingField(_handler);
             playingField.Show();
             this.Close();
         }

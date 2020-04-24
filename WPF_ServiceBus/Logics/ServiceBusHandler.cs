@@ -9,134 +9,45 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ServiceBus.Resources;
 
 namespace WPF_ServiceBus.Logics
 {
     public class ServiceBusHandler
     {
+        Dictionary<int, Subscriptions> subscription = new Dictionary<int, Subscriptions>()
+        {
+            { 1, Subscriptions.ChannelOne },
+            { 2, Subscriptions.ChannelTwo },
+            { 3, Subscriptions.ChannelThree },
+            { 4, Subscriptions.ChannelFour },
+        };
+
         public Program program { get; private set; }
 
-        public string SessionCode
-        {
-            get { return program.QueueData.sessionCode; }
-        }
-
-        private ObservableCollection<Player> playerCollection = new ObservableCollection<Player>();
-
-        public ObservableCollection<Player> PlayerCollection
-        {
-            get { return playerCollection; }
-            private set { playerCollection = value; }
-        }
-
-        public List<Player> PlayerList
-        {
-            get { return playerCollection.ToList(); }
-        }
-
-        public Player self 
-        {
-            get { return program.User; }
-            set { program.User = value; }
-        }
-
-        public ServiceBusHandler()
+        public ServiceBusHandler(Player player, bool host = false)
         {
             // create new instance of program
-            program = new Program();
-        }
+            program = new Program(player);
 
-        public void CreateQueueConnection(string sessionCode, PlayerType playerType)
-        {
-            QueueData writerData;
-            QueueData listnerData;
-
-            if (playerType == PlayerType.Host)
+            if (host)
             {
-                // set connection data
-                writerData = CreateHostQueueConnection(sessionCode, false);
-                listnerData = CreateHostQueueConnection(sessionCode, true);
+                StaticResources.PlayerList.Add(StaticResources.user);
+                program.CreateNewTopic();
             }
-            else
-            {
-                // set connection data
-                writerData = CreateGuestQueueConnection(sessionCode, false);
-                listnerData = CreateGuestQueueConnection(sessionCode, true);
-            }
-
-            // pass over connection data
-            program.SetQueueData(writerData, listnerData);
-        }
-
-        private QueueData CreateHostQueueConnection(string sessionCode, bool reader)
-        {
-            // set connection data
-            QueueData data = new QueueData();
-
-            if (reader)
-            {
-                // topic connection string
-                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=listner;SharedAccessKey=OcHkmq27xlgQdRB1gMFJhbLNE7dmAYmzggr2ml/X+Go=;";
-                data.queueName = "join";
-                data.sessionCode = sessionCode;
-            }
-            else
-            {
-                // topic connection string
-                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=writer;SharedAccessKey=W/qSGSLJsyHbE7b1Hj3zW6fid3kB/S0izjixscZp5Yw=;";
-                data.queueName = "response";
-                data.sessionCode = sessionCode;
-            }
-
-            return data;
-        }
-
-        private QueueData CreateGuestQueueConnection(string sessionCode, bool reader)
-        {
-            // set connection data
-            QueueData data = new QueueData();
-
-            if (reader)
-            {
-                // topic connection string
-                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=listner;SharedAccessKey=GzBNcv3kFZ0p9kjodCafGOTVUKObvIMGX1msgtdwE4A=";
-                data.queueName = "response";
-                data.sessionCode = sessionCode;
-            }
-            else
-            {
-                // topic connection string
-                data.QueueConnectionString = "Endpoint=sb://fontysaquadis.servicebus.windows.net/;SharedAccessKeyName=writer;SharedAccessKey=Qo3wBhYffRY/CSrpu4vcH7n+EtbVbRNZjC+HFEewb9c=;";
-                data.queueName = "join";
-                data.sessionCode = sessionCode;
-            }
-
-            return data;
         }
 
         public ServiceBusHandler(Program existingProgram)
         {
             // store instance of program with the session data for use
             program = existingProgram;
-            program.SetTopicData();
         }
 
-        public void SendQueueMessage(string message, MessageType type)
-        {
-            // sent requested message
-            program.SendQueueMessage(message, type);
-        }
-
-        public void SendTopicMessage(string message, MessageType type)
-        {
-            // sent requested message
-            program.SendTopicMessage(message, type);
-        }
 
         public void HandleQueueMessage(string message)
         {
             // check if player is identified
-            if (self != null)
+            if (StaticResources.user != null)
             {
                 // decode message
                 Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
@@ -146,16 +57,16 @@ namespace WPF_ServiceBus.Logics
                 if (transfer.type == MessageType.JoinRequest)
                 {
                     //check if the player is the host, because only the host may handel messages of the type JoinRequest
-                    if (self.type == PlayerType.Host)
+                    if (StaticResources.user.type == PlayerType.Host)
                     {
                         // decode message
                         source = JsonConvert.DeserializeObject<Player>(transfer.message);
 
                         // count amount of people in the game
-                        int playerCount = PlayerList.Count();
+                        int playerCount = StaticResources.PlayerList.Count();
 
                         // check if the player is already in the game
-                        int exists = PlayerList.Where(p => p.userId == source.userId).Count();
+                        int exists = StaticResources.PlayerList.Where(p => p.userId == source.userId).Count();
 
                         // check if there are less than 4 people in the game and the new request is from a new player
                         if (playerCount < 4 && exists == 0)
@@ -164,7 +75,7 @@ namespace WPF_ServiceBus.Logics
                             source.orderNumber = ++playerCount;
 
                             // add new player to the player list
-                            List<Player> players = playerCollection.ToList();
+                            List<Player> players = StaticResources.PlayerList;
                             players.Add(source);
 
                             // create response model
@@ -173,28 +84,16 @@ namespace WPF_ServiceBus.Logics
                             response.accepted = true;
                             response.topicData = new TopicData()
                             {
-                                TopicConnectionString = program.TopicData.TopicConnectionString, // get newly created topic connection string
-                                topic = program.TopicData.topic // get newly created topic name
+                                TopicConnectionString = program.topic.TopicData.TopicConnectionString, // get newly created topic connection string
+                                topic = program.topic.TopicData.topic, // get newly created topic name
+                                subscription = subscription[playerCount] // assign subscription to the new player
                             };
-
-                            // check what channel will be assigned to the new player
-                            if (playerCount == 1)
-                                response.topicData.subscription = Subscriptions.ChannelOne;
-
-                            if (playerCount == 2)
-                                response.topicData.subscription = Subscriptions.ChannelTwo;
-
-                            if (playerCount == 3)
-                                response.topicData.subscription = Subscriptions.ChannelThree;
-
-                            if (playerCount == 4)
-                                response.topicData.subscription = Subscriptions.ChannelFour;
-
+                            
                             // convert the response model to a JsonString
                             string line = JsonConvert.SerializeObject(response);
 
                             // send response data
-                            SendQueueMessage(line, MessageType.Response);
+                            program.QueueWriter.SendQueueMessage(line, MessageType.Response);
 
                             // create new player message, so everyone in the game can update their player list
                             NewPlayerMessage newPlayerMessage = new NewPlayerMessage();
@@ -204,7 +103,7 @@ namespace WPF_ServiceBus.Logics
                             line = JsonConvert.SerializeObject(newPlayerMessage);
 
                             // send the new player message
-                            SendTopicMessage(line, MessageType.NewPlayer);
+                            program.topic.SendTopicMessage(line, MessageType.NewPlayer);
                         }
 
                     }
@@ -221,14 +120,14 @@ namespace WPF_ServiceBus.Logics
                     Player player = response.Player;
 
                     // check if the response is meant for me
-                    if (player.userId == self.userId && player.name == self.name && player.type == self.type)
+                    if (player.userId == StaticResources.user.userId && player.name == StaticResources.user.name && player.type == StaticResources.user.type)
                     {
                         // the response is for me
                         // update player data
-                        self = player;
+                        StaticResources.user = player;
 
                         // store service bus topic data in program
-                        program.StoreTopicData(response.topicData);
+                        program.CreateTopic(response.topicData);
                     }
                 }
             }
@@ -245,16 +144,9 @@ namespace WPF_ServiceBus.Logics
                 NewPlayerMessage response = JsonConvert.DeserializeObject<NewPlayerMessage>(transfer.message);
 
                 // update the player collection with the newly joinend players
-                PlayerCollection = new ObservableCollection<Player>(response.playerList);
+                StaticResources.PlayerList = response.playerList;
             }
-
         }
-
-        public void SetHostData(Player player)
-        {
-            playerCollection.Add(player);
-            self = player;
-            program.CreateNewTopic();
-        }
+       
     }
 }

@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using WPF_ServiceBus.Logics;
 using ServiceBus;
+using ServiceBus.Resources;
 
 namespace WPF_ServiceBus
 {
@@ -24,7 +25,7 @@ namespace WPF_ServiceBus
     /// </summary>
     public partial class PlayingField : Window
     {
-        ServiceBusHandler _handler;
+        ServiceBusHandler _handler { get; set; }
         Coordinates coordinates { get; set; }
 
         void addLogItem(string text)
@@ -35,10 +36,10 @@ namespace WPF_ServiceBus
             lbLog.ScrollIntoView(lbLog.SelectedItem);
         }
 
-        public PlayingField(Program program)
+        public PlayingField(ServiceBusHandler handler)
         {
             InitializeComponent();
-            _handler = new ServiceBusHandler(program);
+            _handler = handler;
         }
 
         public PlayingField()
@@ -52,23 +53,6 @@ namespace WPF_ServiceBus
             // check if handler is empty, if so create an instance of it
             if (_handler == null)
             {
-                // create an instance of the servicebus handler
-                _handler = new ServiceBusHandler();
-
-                // initialise SessionCodeGenerator
-                SessionCodeGenerator generator = new SessionCodeGenerator();
-
-                // Generade sessionCode
-                string sessionCode = generator.GenerateSessionCode();
-
-                _handler.CreateQueueConnection(sessionCode, PlayerType.Host);
-
-                _handler.program.MessageReceived += OnMessageReceived;
-            }
-
-            // check if user data is unset
-            if (_handler.self == null)
-            {
                 Player player = new Player()
                 {
                     name = "",
@@ -77,11 +61,23 @@ namespace WPF_ServiceBus
                     type = PlayerType.Host
                 };
 
-                // store player data in handler
-                _handler.SetHostData(player);
+                // create an instance of the servicebus handler
+                _handler = new ServiceBusHandler(player, true);
 
-                _handler.program.MessageReceived += OnMessageReceived;
+                // initialise SessionCodeGenerator
+                SessionCodeGenerator generator = new SessionCodeGenerator();
+
+                // Generade sessionCode
+                string sessionCode = generator.GenerateSessionCode();
+                StaticResources.sessionCode = sessionCode;
+
+                _handler.program.CreateQueueConnection(PlayerType.Host);
+
+                _handler.program.QueueListner.MessageReceived += OnMessageReceived;
             }
+
+
+            _handler.program.topic.MessageReceived += OnMessageReceived;
         }
 
         private void shoot_Click(object sender, RoutedEventArgs e)
@@ -95,7 +91,7 @@ namespace WPF_ServiceBus
 
                 string message = JsonConvert.SerializeObject(actionModel);
 
-                _handler.SendTopicMessage(message, MessageType.Action);
+                _handler.program.topic.SendTopicMessage(message, MessageType.Action);
 
                 addLogItem("shooting data send");
             }
@@ -114,7 +110,7 @@ namespace WPF_ServiceBus
 
             string message = JsonConvert.SerializeObject(actionModel);
 
-            _handler.SendTopicMessage(message, MessageType.Action);
+            _handler.program.topic.SendTopicMessage(message, MessageType.Action);
             addLogItem("you chose to surender");
         }
 

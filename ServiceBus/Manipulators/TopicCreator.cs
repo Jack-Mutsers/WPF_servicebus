@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ServiceBus
+namespace ServiceBus.Manipulators
 {
     public class TopicCreator
     {
-        public TopicData CreateNewTopic(string session_code)
+        public TopicData CreateNewTopic()
         {
             TopicData data = new TopicData();
 
