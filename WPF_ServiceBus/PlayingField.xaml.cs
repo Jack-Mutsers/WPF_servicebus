@@ -62,22 +62,12 @@ namespace WPF_ServiceBus
                 };
 
                 // create an instance of the servicebus handler
-                _handler = new ServiceBusHandler(player, true);
+                _handler = new ServiceBusHandler(player);
 
-                // initialise SessionCodeGenerator
-                SessionCodeGenerator generator = new SessionCodeGenerator();
-
-                // Generade sessionCode
-                string sessionCode = generator.GenerateSessionCode();
-                StaticResources.sessionCode = sessionCode;
-
-                _handler.program.CreateQueueConnection(PlayerType.Host);
-
-                _handler.program.QueueListner.MessageReceived += OnMessageReceived;
             }
 
 
-            _handler.program.topic.MessageReceived += OnMessageReceived;
+            _handler.program.MessageReceived += OnMessageReceived;
         }
 
         private void shoot_Click(object sender, RoutedEventArgs e)
@@ -91,7 +81,7 @@ namespace WPF_ServiceBus
 
                 string message = JsonConvert.SerializeObject(actionModel);
 
-                _handler.program.topic.SendTopicMessage(message, MessageType.Action);
+                _handler.program.SendTopicMessage(message, MessageType.Action);
 
                 addLogItem("shooting data send");
             }
@@ -110,7 +100,7 @@ namespace WPF_ServiceBus
 
             string message = JsonConvert.SerializeObject(actionModel);
 
-            _handler.program.topic.SendTopicMessage(message, MessageType.Action);
+            _handler.program.SendTopicMessage(message, MessageType.Action);
             addLogItem("you chose to surender");
         }
 

@@ -34,7 +34,7 @@ namespace WPF_ServiceBus
 
         private void Start_Host(object sender, RoutedEventArgs e)
         {
-            // check if handler is empty, if so create an instance of it
+            //check if handler is empty, if so create an instance of it
             if (_handler == null)
             {
                 // Set player data
@@ -44,37 +44,19 @@ namespace WPF_ServiceBus
                 player.orderNumber = 1;
 
                 // create an instance of the servicebus handler
-                _handler = new ServiceBusHandler(player, true);
-
-                // initialise SessionCodeGenerator
-                SessionCodeGenerator generator = new SessionCodeGenerator();
-
-                // Generade sessionCode
-                string sessionCode = generator.GenerateSessionCode();
-
-                StaticResources.sessionCode = sessionCode;
-
-                _handler.program.CreateQueueConnection(PlayerType.Host);
-
-                _handler.program.QueueListner.MessageReceived += OnQueueMessageReceived;
-                _handler.program.topic.MessageReceived += OnTopicMessageReceived;
+                _handler = new ServiceBusHandler(player);
             }
+
+            _handler.StartHost();
+
+            _handler.program.MessageReceived += OnTopicMessageReceived;
 
             lblSession.Content = StaticResources.sessionCode;
             lv.ItemsSource = StaticResources.PlayerList;
 
+            //ApiResponse response = ApiConnector.CreateHost();
         }
 
-        public void OnQueueMessageReceived(string message)
-        {
-            Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
-
-            if (transfer.type == MessageType.JoinRequest)
-            {
-                _handler.HandleQueueMessage(message);
-                lblSession.Content = StaticResources.sessionCode;
-            }
-        }
 
         public void OnTopicMessageReceived(string message)
         {

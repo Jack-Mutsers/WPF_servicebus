@@ -43,40 +43,23 @@ namespace WPF_ServiceBus
             // check if handler is empty, if so create an instance of it
             if (_handler == null)
             {
-
                 Player player = new Player();
                 player.name = tbName.Text;
                 player.type = PlayerType.Guest;
 
                 // create an instance of the servicebus handler
                 _handler = new ServiceBusHandler(player);
-
-                // get sessin code
-                string sessionCode = tbCode.Text;
-
-                StaticResources.sessionCode = sessionCode;
-
-                // create Queue connection
-                _handler.program.CreateQueueConnection(PlayerType.Guest);
-
-                _handler.program.QueueListner.MessageReceived += OnQueueMessageReceived;
             }
+
+            StaticResources.sessionCode = tbCode.Text;
+            _handler.JoinHost();
+
+            _handler.program.MessageReceived += OnTopicMessageReceived;
 
             string message = JsonConvert.SerializeObject(StaticResources.user);
 
-            _handler.program.QueueWriter.SendQueueMessage(message, MessageType.JoinRequest);
-        }
-
-        public void OnQueueMessageReceived(string message)
-        {
-            Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
-
-            if (transfer.type == MessageType.Response)
-            {
-                _handler.HandleQueueMessage(message);
-                lblSession.Content = StaticResources.sessionCode;
-                _handler.program.topic.MessageReceived += OnTopicMessageReceived;
-            }
+            lblSession.Content = StaticResources.sessionCode;
+            lv.ItemsSource = StaticResources.PlayerList;
         }
 
         public void OnTopicMessageReceived(string message)

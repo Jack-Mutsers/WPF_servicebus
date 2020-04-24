@@ -7,7 +7,7 @@ namespace ServiceBus.Data
 {
     public class TopicData
     {
-        public string TopicConnectionString { get; set; }
+        public string connectionString { get; set; }
         public string topic { get; set; }
         public Subscriptions subscription { get; set; }
     }

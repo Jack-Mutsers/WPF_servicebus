@@ -40,17 +40,13 @@ namespace ServiceBus.Handlers
 
         public async Task CompleteMessageAsync(string lockToken)
         {
-            try
-            {
-                // Complete the message so that it is not received again.
-                // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
-                await subscriptionClient.CompleteAsync(lockToken);
+            // Complete the message so that it is not received again.
+            // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
+            await subscriptionClient.CompleteAsync(lockToken);
 
-                // Note: Use the cancellationToken passed as necessary to determine if the subscriptionClient has already been closed.
-                // If subscriptionClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.
-                // to avoid unnecessary exceptions.
-            }
-            catch(Exception ex){ }
+            // Note: Use the cancellationToken passed as necessary to determine if the subscriptionClient has already been closed.
+            // If subscriptionClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.
+            // to avoid unnecessary exceptions.
         }
 
         void RegisterOnMessageHandlerAndReceiveMessages(Func<Message,CancellationToken,Task> onMessageRecivedCallBack)

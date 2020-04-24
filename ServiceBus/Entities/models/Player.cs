@@ -9,7 +9,7 @@ namespace ServiceBus.Entities.models
 {
     public class Player
     {
-        public Guid userId { get; set; } = Guid.NewGuid();
+        public Guid id { get; set; } = Guid.NewGuid();
         public string name { get; set; }
         public int orderNumber { get; set; } = 0;
         public bool ready { get; set; } = false;
