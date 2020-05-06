@@ -54,7 +54,7 @@ namespace WPF_ServiceBus
                 // create an instance of the servicebus handler
                 _handler = new ServiceBusHandler(player, true);
 
-                _handler.program.CreateQueueConnection(PlayerType.Host);
+                _handler.program.CreateQueueListner(PlayerType.Host);
 
                 _handler.program.QueueListner.MessageReceived += OnQueueMessageReceived;
                 _handler.program.topic.MessageReceived += OnTopicMessageReceived;
@@ -72,7 +72,6 @@ namespace WPF_ServiceBus
             if (transfer.type == MessageType.JoinRequest)
             {
                 _handler.HandleQueueMessage(message);
-                lblSession.Content = StaticResources.sessionCode;
             }
         }
 
@@ -82,7 +81,7 @@ namespace WPF_ServiceBus
 
             if (transfer.type == MessageType.NewPlayer)
             {
-                _handler.HandleTopicMessage(message);
+                _handler.HandleNewPlayerTopicMessage(message);
                 lblSession.Content = StaticResources.sessionCode;
                 lv.ItemsSource = StaticResources.PlayerList;
             }

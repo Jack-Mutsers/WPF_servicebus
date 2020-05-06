@@ -48,23 +48,24 @@ namespace WPF_ServiceBus
                 player.name = tbName.Text;
                 player.type = PlayerType.Guest;
 
-                // create an instance of the servicebus handler
-                _handler = new ServiceBusHandler(player);
-
                 // get sessin code
                 string sessionCode = tbCode.Text;
 
                 StaticResources.sessionCode = sessionCode;
 
+                // create an instance of the servicebus handler
+                _handler = new ServiceBusHandler(player);
+
                 // create Queue connection
-                _handler.program.CreateQueueConnection(PlayerType.Guest);
+                _handler.program.CreateQueueListner(PlayerType.Guest);
+                _handler.program.CreateQueueWriter(PlayerType.Guest);
 
                 _handler.program.QueueListner.MessageReceived += OnQueueMessageReceived;
             }
 
             string message = JsonConvert.SerializeObject(StaticResources.user);
 
-            _handler.program.QueueWriter.SendQueueMessage(message, MessageType.JoinRequest);
+            _handler.program.QueueWriter.SendQueueMessage(message, MessageType.JoinRequest, _handler.program.QueueListner.QueueData);
         }
 
         public void OnQueueMessageReceived(string message)
@@ -85,7 +86,7 @@ namespace WPF_ServiceBus
 
             if (transfer.type == MessageType.NewPlayer)
             {
-                _handler.HandleTopicMessage(message);
+                _handler.HandleNewPlayerTopicMessage(message);
                 lv.ItemsSource = StaticResources.PlayerList;
             }
         }

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Database.Entities.DataTransferObjects;
-using Database.Entities.Models;
+using Entities.DataTransferObjects;
+using Entities.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;

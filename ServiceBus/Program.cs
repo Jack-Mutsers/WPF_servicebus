@@ -8,9 +8,10 @@ using ServiceBus.Data;
 using System.Collections.Generic;
 using System;
 using ServiceBus.Entities.Enums;
-using ServiceBus.Handlers;
+using ServiceBus.ServiceBusHandlers;
 using ServiceBus.Manipulators;
 using ServiceBus.Resources;
+using ServiceBus.ConnectionHandlers;
 
 namespace ServiceBus
 {
@@ -25,35 +26,42 @@ namespace ServiceBus
             StaticResources.user = player;
         }
 
-        public void CreateQueueConnection(PlayerType playerType)
-        {
-            CreateQueueListner(playerType);
-            CreateQueueWriter(playerType);
-        }
-
-        private void CreateQueueListner(PlayerType playerType)
+        public void CreateQueueListner(PlayerType playerType)
         {
             QueueTypes queueTypes = new QueueTypes();
-            QueueData listnerData = playerType == PlayerType.Host ?
-                queueTypes.GetHostQueueListner() :
-                queueTypes.GetGuestQueueListner();
+
+            string queueName = playerType == PlayerType.Host ?
+                "Join-" + StaticResources.sessionCode :
+                "response-" + StaticResources.sessionCode + StaticResources.user.userId.ToString();
+
+            QueueData listnerData = QueueManipulator.CreateNewQueue(queueName);
 
             // pass over connection data
             QueueListner = new QueueListnerHandler(listnerData);
         }
 
-        private void CreateQueueWriter(PlayerType playerType)
+        public void CreateQueueWriter(PlayerType playerType, QueueData queueData = null)
         {
+            if (QueueWriter != null)
+            {
+                QueueWriter.DisconnectFromQueue();
+            }
+
             QueueTypes queueTypes = new QueueTypes();
-            QueueData writerData = playerType == PlayerType.Host ?
-                queueTypes.GetHostQueueWriter() :
-                queueTypes.GetGuestQueueWriter();
+
+            QueueData writerData = queueData;
+
+            if (playerType == PlayerType.Guest)
+            {
+                string queueName = "Join-" + StaticResources.sessionCode;
+                writerData = QueueManipulator.CreateNewQueue(queueName);
+            }
 
             // pass over connection data
             QueueWriter = new QueueWriterHandler(writerData);
         }
 
-        public void CreateTopic(TopicData data)
+        public void CreateTopicConnection(TopicData data)
         {
             if (topic == null)
             {
@@ -63,10 +71,10 @@ namespace ServiceBus
 
         public void CreateNewTopic()
         {
-            TopicCreator topicCreator = new TopicCreator();
-            TopicData data = topicCreator.CreateNewTopic();
+            TopicData data = TopicManipulator.CreateNewTopic();
 
-            CreateTopic(data);
+            CreateTopicConnection(data);
         }
+
     }
 }

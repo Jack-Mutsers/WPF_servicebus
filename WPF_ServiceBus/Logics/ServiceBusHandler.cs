@@ -30,9 +30,13 @@ namespace WPF_ServiceBus.Logics
             // create new instance of program
             program = new Program(player);
 
+            // if player is host, create new topic to play the game in
             if (host)
             {
+                // add host to the player list
                 StaticResources.PlayerList.Add(StaticResources.user);
+
+                // create new topic with subscriptions
                 program.CreateNewTopic();
             }
         }
@@ -42,7 +46,6 @@ namespace WPF_ServiceBus.Logics
             // store instance of program with the session data for use
             program = existingProgram;
         }
-
 
         public void HandleQueueMessage(string message)
         {
@@ -92,8 +95,14 @@ namespace WPF_ServiceBus.Logics
                             // convert the response model to a JsonString
                             string line = JsonConvert.SerializeObject(response);
 
-                            // send response data
+                            // create writer program
+                            program.CreateQueueWriter(PlayerType.Host, transfer.QueueData);
+
+                            // send response data on the newly joined writer queue
                             program.QueueWriter.SendQueueMessage(line, MessageType.Response);
+
+                            // disconnect from the writer queue
+                            //program.QueueWriter.DisconnectFromQueue();
 
                             // create new player message, so everyone in the game can update their player list
                             NewPlayerMessage newPlayerMessage = new NewPlayerMessage();
@@ -127,17 +136,18 @@ namespace WPF_ServiceBus.Logics
                         StaticResources.user = player;
 
                         // store service bus topic data in program
-                        program.CreateTopic(response.topicData);
+                        program.CreateTopicConnection(response.topicData);
                     }
                 }
             }
         }
 
-        public void HandleTopicMessage(string message)
+        public void HandleNewPlayerTopicMessage(string message)
         {
             // decode message
             Transfer transfer = JsonConvert.DeserializeObject<Transfer>(message);
 
+            // check if the message is for a new player that has joined
             if (transfer.type == MessageType.NewPlayer)
             {
                 // decode message to SessionResponseModel

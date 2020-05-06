@@ -11,5 +11,6 @@ namespace ServiceBus
     public interface IServiceBusQueueHandler
     {
         Task SendMessagesAsync(string message, string sessionCode);
+        void DisconnectAsync();
     }
 }

@@ -71,9 +71,9 @@ namespace WPF_ServiceBus
                 string sessionCode = generator.GenerateSessionCode();
                 StaticResources.sessionCode = sessionCode;
 
-                _handler.program.CreateQueueConnection(PlayerType.Host);
+                //_handler.program.CreateQueueConnection(PlayerType.Host);
 
-                _handler.program.QueueListner.MessageReceived += OnMessageReceived;
+                //_handler.program.QueueListner.MessageReceived += OnMessageReceived;
             }
 
 
