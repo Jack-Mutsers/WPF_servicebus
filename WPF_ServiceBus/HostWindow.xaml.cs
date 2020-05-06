@@ -37,6 +37,14 @@ namespace WPF_ServiceBus
             // check if handler is empty, if so create an instance of it
             if (_handler == null)
             {
+                // initialise SessionCodeGenerator
+                SessionCodeGenerator generator = new SessionCodeGenerator();
+
+                // Generade sessionCode
+                string sessionCode = generator.GenerateSessionCode();
+
+                StaticResources.sessionCode = sessionCode;
+
                 // Set player data
                 Player player = new Player();
                 player.name = tbName.Text;
@@ -45,14 +53,6 @@ namespace WPF_ServiceBus
 
                 // create an instance of the servicebus handler
                 _handler = new ServiceBusHandler(player, true);
-
-                // initialise SessionCodeGenerator
-                SessionCodeGenerator generator = new SessionCodeGenerator();
-
-                // Generade sessionCode
-                string sessionCode = generator.GenerateSessionCode();
-
-                StaticResources.sessionCode = sessionCode;
 
                 _handler.program.CreateQueueConnection(PlayerType.Host);
 
