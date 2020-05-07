@@ -76,5 +76,11 @@ namespace ServiceBus
             CreateTopicConnection(data);
         }
 
+        public void DeleteListnerQueue()
+        {
+            string queueName = QueueListner.QueueData.queueName;
+
+            QueueManipulator.DeleteQueue(queueName);
+        }
     }
 }

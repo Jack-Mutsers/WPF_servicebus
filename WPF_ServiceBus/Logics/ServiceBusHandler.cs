@@ -137,6 +137,11 @@ namespace WPF_ServiceBus.Logics
 
                         // store service bus topic data in program
                         program.CreateTopicConnection(response.topicData);
+
+                        program.QueueWriter.DisconnectFromQueue();
+                        program.QueueListner.DisconnectFromQueue();
+
+                        program.DeleteListnerQueue();
                     }
                 }
             }
