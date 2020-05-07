@@ -1,0 +1,12 @@
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\bin\Debug\netstandard2.0\Contracts.deps.json
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\bin\Debug\netstandard2.0\Contracts.dll
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\bin\Debug\netstandard2.0\Contracts.pdb
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\bin\Debug\netstandard2.0\Entities.dll
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\bin\Debug\netstandard2.0\Entities.pdb
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\obj\Debug\netstandard2.0\Contracts.csprojAssemblyReference.cache
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\obj\Debug\netstandard2.0\Contracts.csproj.CoreCompileInputs.cache
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\obj\Debug\netstandard2.0\Contracts.AssemblyInfoInputs.cache
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\obj\Debug\netstandard2.0\Contracts.AssemblyInfo.cs
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\obj\Debug\netstandard2.0\Contracts.csproj.CopyComplete
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\obj\Debug\netstandard2.0\Contracts.dll
+D:\programeren\semester 2\individual\WPF_ServiceBus\Contracts\obj\Debug\netstandard2.0\Contracts.pdb

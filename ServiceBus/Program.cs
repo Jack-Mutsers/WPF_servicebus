@@ -3,66 +3,78 @@ using Newtonsoft.Json;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ServiceBus.model;
-using ServiceBus.session;
+using ServiceBus.Entities.models;
+using ServiceBus.Data;
+using System.Collections.Generic;
+using System;
+using ServiceBus.Entities.Enums;
+using ServiceBus.ServiceBusHandlers;
+using ServiceBus.Manipulators;
+using ServiceBus.Resources;
+using ServiceBus.ConnectionHandlers;
 
 namespace ServiceBus
 {
     public class Program
     {
-        private IServiceBusHandler _handler;
-        private SessionData _SessionData { get; set; }
-        private SynchronizationContext _currentSynchronizationContext; // Needed to Synchronize between threads, Service buss handler is called from another thread
+        public QueueListnerHandler QueueListner { get; private set; }
+        public QueueWriterHandler QueueWriter { get; private set; }
+        public TopicConnectionHandler topic { get; private set; }
 
-        public delegate void DataReceivedEventHandler(ActionModel source);
-        public event DataReceivedEventHandler MessageReceived;
-
-        public Program()
+        public Program(Player player)
         {
-            MessageReceived += DoNothing; // needed to prevent the application from crashing
-            _currentSynchronizationContext = SynchronizationContext.Current;
+            StaticResources.user = player;
         }
 
-        public void UpdateSubscription(Subscriptions subscription)
+        public void CreateQueueListner(PlayerType playerType)
         {
-            _SessionData.subscription = subscription;
+            QueueTypes queueTypes = new QueueTypes();
+
+            string queueName = playerType == PlayerType.Host ?
+                "Join-" + StaticResources.sessionCode :
+                "response-" + StaticResources.sessionCode + StaticResources.user.userId.ToString();
+
+            QueueData listnerData = QueueManipulator.CreateNewQueue(queueName);
+
+            // pass over connection data
+            QueueListner = new QueueListnerHandler(listnerData);
         }
 
-        private void DoNothing(ActionModel source){} // needed to prevent the application from crashing
-
-        public void setResponse(ActionModel model)
+        public void CreateQueueWriter(PlayerType playerType, QueueData queueData = null)
         {
-            MessageReceived(model);
+            if (QueueWriter != null)
+            {
+                QueueWriter.DisconnectFromQueue();
+            }
+
+            QueueTypes queueTypes = new QueueTypes();
+
+            QueueData writerData = queueData;
+
+            if (playerType == PlayerType.Guest)
+            {
+                string queueName = "Join-" + StaticResources.sessionCode;
+                writerData = QueueManipulator.CreateNewQueue(queueName);
+            }
+
+            // pass over connection data
+            QueueWriter = new QueueWriterHandler(writerData);
         }
 
-        public void SetData(SessionData data)
+        public void CreateTopicConnection(TopicData data)
         {
-            _SessionData = data;
-
-            //_handler = new ServiceBusTopicHandler(_SessionData.connectionString, _SessionData.topic, _SessionData.subscription, ProcessMessagesAsync);
-            _handler = new ServiceBusQueueHandler(_SessionData.connectionString, _SessionData.queueName, ProcessMessagesAsync);
-        }
-
-        public async void SendMessage(ActionModel connectionModel)
-        {
-            string line = JsonConvert.SerializeObject(connectionModel);
-            await _handler.SendMessagesAsync(line);
-        }
-
-        public async Task ProcessMessagesAsync(Message message, CancellationToken token)
-        {
-            // Process the message.
-            string val = $"{Encoding.UTF8.GetString(message.Body)}";
-
-            if (val.StartsWith("{") && val.EndsWith("}")){
-                //convert the message to the model
-                ActionModel connection = (ActionModel)JsonConvert.DeserializeObject(val, typeof(ActionModel));
-                
-                await _handler.completeAsync(message.SystemProperties.LockToken);
-
-                _currentSynchronizationContext.Send(x => setResponse(connection), null);
+            if (topic == null)
+            {
+                topic = new TopicConnectionHandler(data);
             }
         }
-        
+
+        public void CreateNewTopic()
+        {
+            TopicData data = TopicManipulator.CreateNewTopic();
+
+            CreateTopicConnection(data);
+        }
+
     }
 }

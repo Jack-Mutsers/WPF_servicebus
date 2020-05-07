@@ -1,0 +1,8 @@
+D:\programeren\semester 2\individual\WPF_ServiceBus\Entities\bin\Debug\netstandard2.0\Entities.deps.json
+D:\programeren\semester 2\individual\WPF_ServiceBus\Entities\bin\Debug\netstandard2.0\Entities.dll
+D:\programeren\semester 2\individual\WPF_ServiceBus\Entities\bin\Debug\netstandard2.0\Entities.pdb
+D:\programeren\semester 2\individual\WPF_ServiceBus\Entities\obj\Debug\netstandard2.0\Entities.csproj.CoreCompileInputs.cache
+D:\programeren\semester 2\individual\WPF_ServiceBus\Entities\obj\Debug\netstandard2.0\Entities.AssemblyInfoInputs.cache
+D:\programeren\semester 2\individual\WPF_ServiceBus\Entities\obj\Debug\netstandard2.0\Entities.AssemblyInfo.cs
+D:\programeren\semester 2\individual\WPF_ServiceBus\Entities\obj\Debug\netstandard2.0\Entities.dll
+D:\programeren\semester 2\individual\WPF_ServiceBus\Entities\obj\Debug\netstandard2.0\Entities.pdb
